@@ -2,464 +2,856 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Procedure Randomiser + Tracker</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FACEM Procedure Randomiser</title>
   <style>
-    :root { color-scheme: light dark; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; line-height: 1.4; }
-    h1 { margin: 0 0 10px; }
-    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #8884; cursor: pointer; }
-    button.primary { font-weight: 650; }
-    button.danger { border-color: #c004; }
-    input, textarea, select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #8884; }
-    textarea { min-height: 70px; resize: vertical; }
-    .card { border: 1px solid #8884; border-radius: 14px; padding: 16px; margin: 14px 0; }
-    .big { font-size: 1.5rem; font-weight: 750; margin: 10px 0 0; }
-    .muted { opacity: 0.75; }
-    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 880px) { .grid { grid-template-columns: 1.2fr 0.8fr; } }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
-    th, td { padding: 8px 10px; border-bottom: 1px solid #8883; text-align: left; }
-    th { position: sticky; top: 0; background: color-mix(in srgb, Canvas 92%, transparent); backdrop-filter: blur(6px); }
-    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid #8884; font-size: 0.85rem; }
-    .right { text-align: right; }
-    .split { display: grid; grid-template-columns: 1fr; gap: 10px; }
-    @media (min-width: 640px) { .split { grid-template-columns: 1fr 1fr; } }
-    details { margin-top: 10px; }
-    .footer { margin-top: 18px; font-size: 0.9rem; opacity: 0.75; }
+    :root{
+      --bg: #0b1220;
+      --card: rgba(255,255,255,0.06);
+      --card2: rgba(255,255,255,0.08);
+      --text: rgba(255,255,255,0.92);
+      --muted: rgba(255,255,255,0.68);
+      --border: rgba(255,255,255,0.14);
+      --shadow: 0 16px 50px rgba(0,0,0,0.45);
+      --radius: 18px;
+      --radius2: 999px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(99,102,241,0.28), transparent 55%),
+        radial-gradient(900px 600px at 80% 15%, rgba(16,185,129,0.22), transparent 60%),
+        radial-gradient(1100px 700px at 60% 90%, rgba(236,72,153,0.18), transparent 60%),
+        var(--bg);
+      min-height:100vh;
+      padding: 26px 18px 40px;
+    }
+    .container{ max-width: 1100px; margin: 0 auto; }
+    header{
+      display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+      margin-bottom: 14px;
+    }
+    h1{ margin:0; font-size: 1.35rem; letter-spacing: 0.2px; }
+    .subtitle{ margin:0; color: var(--muted); font-size:0.95rem; }
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,0.04);
+      padding: 8px 12px;
+      border-radius: var(--radius2);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 14px;
+      align-items:start;
+      margin-top: 12px;
+    }
+    @media (max-width: 960px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+    .card{
+      background: linear-gradient(180deg, var(--card2), var(--card));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .card-inner{ padding: 16px; }
+    .hero{
+      min-height: 52vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      padding: 26px 18px;
+      gap: 14px;
+    }
+    .hero h2{ margin:0; font-size: 1.05rem; color: var(--muted); font-weight: 600; }
+    .hero-btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      padding: 16px 26px;
+      border-radius: var(--radius2);
+      border: 1px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform .06s ease, background .2s ease, border-color .2s ease;
+      user-select:none;
+    }
+    .hero-btn:hover{
+      background: rgba(255,255,255,0.12);
+      border-color: rgba(255,255,255,0.28);
+    }
+    .hero-btn:active{ transform: scale(0.985); }
+    .procedure-big{
+      margin-top: 6px;
+      font-size: clamp(2rem, 4.2vw, 3.1rem);
+      font-weight: 900;
+      line-height: 1.12;
+      letter-spacing: 0.2px;
+    }
+    .meta-row{
+      display:flex; flex-wrap:wrap; gap:10px;
+      justify-content:center;
+      margin-top: 4px;
+    }
+    .tag{
+      display:inline-flex; align-items:center; gap:8px;
+      padding: 7px 11px;
+      border-radius: var(--radius2);
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.15);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: min(780px, 100%);
+      margin-top: 6px;
+    }
+    @media (max-width: 720px){
+      .controls{ grid-template-columns: 1fr; }
+    }
+    label{ display:block; font-size:0.9rem; color: var(--muted); margin-bottom: 6px; }
+    select, input[type="text"], textarea{
+      width:100%;
+      padding: 11px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      outline:none;
+    }
+    textarea{ min-height: 92px; resize: vertical; }
+    select:focus, input:focus, textarea:focus{
+      border-color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.08);
+    }
+    .row{
+      display:flex; gap: 10px; flex-wrap:wrap; align-items:center;
+    }
+    .toggle{
+      display:flex; gap: 10px; flex-wrap:wrap; align-items:center; justify-content:center;
+      color: var(--muted);
+      font-size:0.95rem;
+    }
+    .toggle input{ transform: scale(1.1); }
+    .actions{
+      display:flex; flex-wrap:wrap; gap: 10px; justify-content:center;
+      margin-top: 4px;
+    }
+    .btn{
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      cursor:pointer;
+      transition: background .2s ease;
+      font-weight: 650;
+    }
+    .btn:hover{ background: rgba(255,255,255,0.10); }
+    .btn.secondary{ color: var(--muted); font-weight: 650; }
+    .btn.danger{ border-color: rgba(239,68,68,0.35); }
+    .muted{ color: var(--muted); }
+
+    .section-title{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap:wrap;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      background: rgba(0,0,0,0.10);
+    }
+    .section-title h3{ margin:0; font-size: 1rem; }
+    .table-wrap{ overflow:auto; max-height: 520px; }
+    table{
+      width:100%;
+      border-collapse: collapse;
+      min-width: 820px;
+    }
+    th, td{
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      text-align:left;
+      vertical-align:top;
+      font-size: 0.95rem;
+    }
+    th{
+      position: sticky;
+      top: 0;
+      background: rgba(10, 18, 32, 0.88);
+      backdrop-filter: blur(8px);
+      z-index: 1;
+      color: rgba(255,255,255,0.80);
+      font-size: 0.9rem;
+      letter-spacing: .2px;
+    }
+    .right{ text-align:right; }
+    .small{ font-size: 0.88rem; color: var(--muted); }
+    details{
+      border-top: 1px solid var(--border);
+    }
+    summary{
+      cursor:pointer;
+      padding: 14px 16px;
+      color: rgba(255,255,255,0.82);
+      font-weight: 700;
+      background: rgba(0,0,0,0.10);
+    }
+    .pad{ padding: 16px; }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
+      border:1px solid var(--border);
+      border-radius: 10px;
+      padding: 2px 8px;
+      color: rgba(255,255,255,0.8);
+      background: rgba(0,0,0,0.15);
+    }
   </style>
 </head>
+
 <body>
-  <h1>Procedure Randomiser</h1>
-  <div class="muted">Offline-first. Saves your progress in this browser (localStorage).</div>
-
-  <div class="grid">
-    <!-- LEFT: Randomiser -->
-    <div class="card">
-      <div class="row">
-        <button class="primary" id="btnRandom">🎲 Random procedure</button>
-
-        <label class="row" style="gap:8px;">
-          <input type="checkbox" id="chkPreferUnreviewed" checked />
-          <span>Prefer unreviewed / least-reviewed</span>
-        </label>
-
-        <label class="row" style="gap:8px;">
-          <input type="checkbox" id="chkOnlyNotDone" />
-          <span>Only pick “not done”</span>
-        </label>
+  <div class="container">
+    <header>
+      <div>
+        <h1>FACEM Procedure Randomiser</h1>
+        <p class="subtitle">Targeted revision by domain + category, with tracking saved in your browser.</p>
       </div>
+      <div class="pill" id="pillTotals">Loading…</div>
+    </header>
 
-      <div id="currentWrap" style="margin-top: 10px; display:none;">
-        <div class="muted">Current pick</div>
-        <div class="big" id="currentProcedure"></div>
-        <div class="row" style="margin-top: 10px;">
-          <span class="pill" id="statsPill"></span>
-          <span class="pill" id="lastReviewedPill"></span>
-        </div>
+    <div class="grid">
+      <!-- HERO -->
+      <div class="card">
+        <div class="hero">
+          <h2>Tap to generate a procedure</h2>
 
-        <div style="margin-top: 12px;">
-          <label for="notes"><span class="muted">Notes (optional)</span></label>
-          <textarea id="notes" placeholder="Key steps / pitfalls / doses / anatomy landmarks / complications…"></textarea>
-        </div>
+          <button class="hero-btn" id="btnRandom" title="Pick a random procedure">
+            🎲 Random procedure
+          </button>
 
-        <div class="row" style="margin-top: 10px;">
-          <button id="btnMarkReviewed">✅ Mark as reviewed</button>
-          <button id="btnToggleDone">⭐ Toggle Done</button>
-          <button id="btnSkip">↩︎ Skip (no log)</button>
+          <div id="currentWrap" style="display:none; width:100%;">
+            <div class="procedure-big" id="currentName"></div>
+
+            <div class="meta-row" id="currentTags"></div>
+
+            <div class="controls" style="margin: 10px auto 0;">
+              <div>
+                <label for="filterDomain">Domain filter</label>
+                <select id="filterDomain"></select>
+              </div>
+              <div>
+                <label for="filterCategory">Category filter</label>
+                <select id="filterCategory"></select>
+              </div>
+            </div>
+
+            <div class="toggle" style="margin-top: 10px;">
+              <label style="display:flex; gap:10px; align-items:center; margin:0;">
+                <input type="checkbox" id="chkPreferLeast" checked>
+                Prefer least-reviewed
+              </label>
+              <label style="display:flex; gap:10px; align-items:center; margin:0;">
+                <input type="checkbox" id="chkOnlyNotDone">
+                Only not-done
+              </label>
+            </div>
+
+            <div class="card" style="margin-top: 12px; width: min(780px, 100%);">
+              <div class="card-inner">
+                <div class="row" style="justify-content:space-between;">
+                  <div class="small" id="statLine">—</div>
+                  <div class="row">
+                    <span class="tag" id="donePill">Done: —</span>
+                  </div>
+                </div>
+
+                <label for="notes" style="margin-top:10px;">Notes (optional)</label>
+                <textarea id="notes" placeholder="Key steps / pitfalls / complications / aftercare…"></textarea>
+
+                <div class="actions">
+                  <button class="btn" id="btnReviewed">✅ Mark reviewed</button>
+                  <button class="btn" id="btnToggleDone">⭐ Toggle done</button>
+                  <button class="btn secondary" id="btnSkip">↩︎ Skip</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="muted" id="hintLine">Filters appear after the first pick.</div>
         </div>
 
         <details>
-          <summary>Show last 10 review log entries</summary>
-          <div id="logList" class="muted" style="margin-top: 8px;"></div>
+          <summary>Backup / Restore progress</summary>
+          <div class="pad">
+            <div class="muted">Your tracking is stored in this browser (localStorage). Use backup to move it to another device.</div>
+            <div class="row" style="margin-top: 10px;">
+              <button class="btn" id="btnExport">Export JSON</button>
+              <button class="btn" id="btnImport">Import JSON</button>
+              <button class="btn danger" id="btnReset">Reset ALL data</button>
+            </div>
+            <textarea id="backup" placeholder="Export appears here (or paste backup JSON to import)." style="margin-top:10px;"></textarea>
+          </div>
+        </details>
+
+        <details>
+          <summary>Edit procedure list (advanced)</summary>
+          <div class="pad">
+            <div class="muted">
+              This page comes preloaded with the FACEM procedures + tags. You can override the list by pasting JSON (format below) and clicking Apply.
+              <br><br>
+              Format (array of objects): <span class="kbd">[{ "name": "...", "tags": ["Airway","C","LS"] }]</span>
+            </div>
+            <textarea id="customList" placeholder='Paste JSON list here if you want to override the built-in list.' style="margin-top:10px;"></textarea>
+            <div class="row" style="margin-top:10px;">
+              <button class="btn" id="btnApplyCustom">Apply custom list</button>
+              <button class="btn secondary" id="btnRestoreBuiltIn">Restore built-in FACEM list</button>
+            </div>
+          </div>
         </details>
       </div>
-    </div>
 
-    <!-- RIGHT: Add/edit procedures + backup -->
-    <div class="card">
-      <h3 style="margin-top:0;">Setup</h3>
-
-      <div class="split">
-        <div>
-          <label class="muted">Add a procedure</label>
-          <input id="newProcedure" placeholder="e.g., Chest drain (Seldinger)" />
+      <!-- TRACKER -->
+      <div class="card">
+        <div class="section-title">
+          <h3>Tracker</h3>
+          <div class="row">
+            <select id="sortMode">
+              <option value="least">Least reviewed</option>
+              <option value="recent">Most recently reviewed</option>
+              <option value="alpha">A → Z</option>
+              <option value="done">Done first</option>
+            </select>
+            <input type="text" id="search" placeholder="Search…" style="width: 220px;">
+          </div>
         </div>
-        <div class="row" style="align-items:flex-end;">
-          <button id="btnAdd">Add</button>
-          <button class="danger" id="btnClear" title="Deletes all tracked history in this browser">Reset all data</button>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Procedure</th>
+                <th>Tags</th>
+                <th class="right">Reviewed</th>
+                <th>Last</th>
+                <th>Done</th>
+                <th class="right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
         </div>
       </div>
-
-      <details>
-        <summary>Import / Export backup</summary>
-        <p class="muted">Use this to move your progress to another device.</p>
-        <div class="row">
-          <button id="btnExport">Export JSON</button>
-          <button id="btnImport">Import JSON</button>
-        </div>
-        <textarea id="backup" placeholder="Paste exported JSON here to import"></textarea>
-      </details>
-
-      <details>
-        <summary>Edit procedure list (advanced)</summary>
-        <p class="muted">One procedure per line. Click “Apply list” to overwrite the list (history kept when names match).</p>
-        <textarea id="bulkList"></textarea>
-        <div class="row">
-          <button id="btnApplyList">Apply list</button>
-        </div>
-      </details>
-
-      <div class="footer">
-        Tip: if you host this on GitHub Pages, progress stays per-browser/device unless you import/export.
-      </div>
     </div>
-  </div>
-
-  <!-- TRACKER -->
-  <div class="card">
-    <div class="row" style="justify-content: space-between;">
-      <h3 style="margin:0;">Tracker</h3>
-      <div class="row">
-        <label class="row" style="gap:8px;">
-          <span class="muted">Sort</span>
-          <select id="sortMode">
-            <option value="least">Least reviewed</option>
-            <option value="most">Most reviewed</option>
-            <option value="alpha">A → Z</option>
-            <option value="recent">Most recently reviewed</option>
-            <option value="done">Done first</option>
-          </select>
-        </label>
-        <input id="search" placeholder="Search…" style="width: 220px;" />
-      </div>
-    </div>
-
-    <table>
-      <thead>
-        <tr>
-          <th>Procedure</th>
-          <th class="right">Reviewed</th>
-          <th>Last reviewed</th>
-          <th>Done</th>
-          <th class="right">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="trackerBody"></tbody>
-    </table>
   </div>
 
 <script>
-/** =========================
- *  CONFIG: Edit your list here
- *  ========================= */
-const DEFAULT_PROCEDURES = [
-  "Airway: RSI (adult)",
-  "Airway: RSI (paediatric)",
-  "Ventilation: NIV setup + troubleshooting",
-  "Cricothyrotomy (scalpel-bougie)",
-  "Central venous catheter (US-guided)",
-  "Arterial line",
-  "Chest drain (Seldinger)",
-  "Needle decompression",
-  "Pericardiocentesis",
-  "Lumbar puncture (adult)",
-  "Lumbar puncture (neonate)",
-  "Procedural sedation (adult)",
-  "Procedural sedation (paeds)",
-  "Suprapubic aspiration",
-  "Shoulder reduction (various techniques)",
-  "Hip reduction",
-  "IO access",
-  "Nerve block: fascia iliaca",
-  "Nerve block: digital block",
-  "Wound: complex laceration repair"
-];
+  /**
+   * Data source: FACEM Curriculum June 2025 "Procedures in Emergency Medicine" tables.
+   * Categories: C = common in EM; LS = life/limb/sight saving. (Used as tags)   [oai_citation:1‡2025_6-FACEM-Curriculum (dragged).pdf](sediment://file_00000000e71c71fabb4191964790d404)
+   */
+  const BUILTIN_PROCEDURES = [
+    // Infection control
+    { name: "Aseptic and sterile technique", tags: ["Infection control","C"] },
 
-/** =========================
- *  Storage helpers
- *  ========================= */
-const KEY = "procedure_randomiser_v1";
+    // Airway
+    { name: "Basic airway manoeuvres (chin lift, jaw thrust, head tilt, positioning)", tags: ["Airway","C","LS"] },
+    { name: "Insertion of oropharyngeal or nasopharyngeal airway", tags: ["Airway","C","LS"] },
+    { name: "Insertion of a laryngeal mask airway", tags: ["Airway","C","LS"] },
+    { name: "Direct laryngoscopy + oral ETT + RSI technique (incl drugs, stylet, bougie)", tags: ["Airway","C","LS"] },
+    { name: "Video laryngoscopy", tags: ["Airway","C","LS"] },
+    { name: "Use of other rescue difficult airway device", tags: ["Airway","LS"] },
+    { name: "Securing and caring for ETT (including during transport)", tags: ["Airway","C","LS"] },
+    { name: "Cricothyroid needle insertion + jet insufflation (adult & child)", tags: ["Airway","LS"] },
+    { name: "Cricothyroidotomy", tags: ["Airway","LS"] },
+    { name: "Emergency replacement of blocked/dislodged tracheostomy tube", tags: ["Airway","LS"] },
+    { name: "Extubation", tags: ["Airway"] },
+    { name: "Indirect laryngoscopy (dental mirror exam for FB)", tags: ["Airway"] },
 
-function loadState() {
-  const raw = localStorage.getItem(KEY);
-  if (!raw) {
-    const fresh = {
-      procedures: DEFAULT_PROCEDURES,
-      meta: {},   // name -> {count, last, done}
-      log: []     // {name, when, notes}
-    };
-    saveState(fresh);
-    return fresh;
+    // Breathing
+    { name: "Spirometry and Peak Flow measurement", tags: ["Breathing","C"] },
+    { name: "Use of oxygen delivery devices", tags: ["Breathing","C","LS"] },
+    { name: "Use of self-inflating bag for ventilation", tags: ["Breathing","C","LS"] },
+    { name: "Use of a non-self-inflating bag for ventilation", tags: ["Breathing"] },
+    { name: "Use of adult non-invasive ventilation device", tags: ["Breathing","C","LS"] },
+    { name: "Use of paediatric non-invasive ventilation device", tags: ["Breathing","LS"] },
+    { name: "Setting up a transport ventilator", tags: ["Breathing","C","LS"] },
+    { name: "Decompression needle/finger thoracostomy", tags: ["Breathing","C","LS"] },
+    { name: "Pleurocentesis", tags: ["Breathing","C"] },
+    { name: "Tube thoracostomy", tags: ["Breathing","C","LS"] },
+
+    // Circulation
+    { name: "External chest compressions (infant, paediatric, adult)", tags: ["Circulation","C","LS"] },
+    { name: "Defibrillation", tags: ["Circulation","C","LS"] },
+    { name: "DC cardioversion", tags: ["Circulation","C","LS"] },
+    { name: "External pacing", tags: ["Circulation","LS"] },
+    { name: "Venipuncture", tags: ["Circulation","C"] },
+    { name: "Adult peripheral intravenous access", tags: ["Circulation","C","LS"] },
+    { name: "Paediatric peripheral intravenous access", tags: ["Circulation","C","LS"] },
+    { name: "Insertion of a rapid infusion catheter", tags: ["Circulation","LS"] },
+    { name: "Intraosseous access", tags: ["Circulation","C","LS"] },
+    { name: "Arterial puncture for blood sampling", tags: ["Circulation","C"] },
+    { name: "Arterial line insertion", tags: ["Circulation","C"] },
+    { name: "Preparation & operation of transport monitoring equipment", tags: ["Circulation","C"] },
+    { name: "Insertion of a central venous line", tags: ["Circulation","C"] },
+    { name: "Emergency pericardiocentesis", tags: ["Circulation","LS"] },
+    { name: "Resuscitative thoracotomy", tags: ["Circulation","LS"] },
+    { name: "Insertion of a temporary pacing wire", tags: ["Circulation","LS"] },
+
+    // Fluids / tubes
+    { name: "Preparation of an intravenous fluid or blood product line", tags: ["Fluids & tubes","C"] },
+    { name: "Insertion of a nasogastric tube or orogastric tube", tags: ["Fluids & tubes","C"] },
+    { name: "Insertion of an adult urinary catheter", tags: ["Fluids & tubes","C"] },
+    { name: "Insertion of an infant urinary catheter", tags: ["Fluids & tubes","C"] },
+    { name: "Suprapubic aspiration of urine in an infant", tags: ["Fluids & tubes","C"] },
+    { name: "Insertion of a suprapubic catheter", tags: ["Fluids & tubes"] },
+    { name: "Replacement of a suprapubic catheter", tags: ["Fluids & tubes","C"] },
+    { name: "Abdominal paracentesis and insertion of drain", tags: ["Fluids & tubes","C"] },
+    { name: "Insertion of oesophageal & gastric balloon devices", tags: ["Fluids & tubes","LS"] },
+    { name: "Emergency replacement of a dislodged gastrostomy tube", tags: ["Fluids & tubes","C"] },
+
+    // Ortho & Neuro
+    { name: "Sizing and application of a rigid cervical collar", tags: ["Ortho & neuro","C","LS"] },
+    { name: "In-line cervical spine immobilisation", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Full spinal immobilisation, log roll, and transfer", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Emergent fracture/dislocation reduction", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Joint reduction – digits", tags: ["Ortho & neuro","C"] },
+    { name: "Joint reduction – major joints", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Fracture/joint immobilisation techniques (including limb splinting)", tags: ["Ortho & neuro","C"] },
+    { name: "Fracture/joint immobilisation – backslab application", tags: ["Ortho & neuro","C"] },
+    { name: "Application of sling/collar and cuff", tags: ["Ortho & neuro","C"] },
+    { name: "Insertion of a fascial intra-compartmental monitor", tags: ["Ortho & neuro"] },
+    { name: "Application of a pelvic binding device", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Application of traction splinting devices", tags: ["Ortho & neuro","C","LS"] },
+    { name: "Arthrocentesis (knee)", tags: ["Ortho & neuro","C"] },
+
+    // Sedation
+    { name: "Administration of procedural sedation", tags: ["Sedation","C"] },
+    { name: "Administration of chemical restraint", tags: ["Sedation","C"] },
+
+    // Regional anaesthesia
+    { name: "Use of topical anaesthesia", tags: ["Regional anaesthesia","C"] },
+    { name: "Direct infiltration of local anaesthetic", tags: ["Regional anaesthesia","C"] },
+    { name: "Digital nerve block", tags: ["Regional anaesthesia","C"] },
+    { name: "Femoral nerve and fascia iliaca block", tags: ["Regional anaesthesia","C"] },
+    { name: "Other peripheral nerve blocks", tags: ["Regional anaesthesia"] },
+    { name: "Intravenous anaesthesia and Bier’s block", tags: ["Regional anaesthesia"] },
+
+    // Wounds
+    { name: "Basic skin suturing techniques", tags: ["Wounds","C"] },
+    { name: "Alternate skin closure (tissue adhesive, staples)", tags: ["Wounds","C"] },
+    { name: "Advanced suturing techniques", tags: ["Wounds","C"] },
+    { name: "Wound exploration, cleaning, irrigation, and debridement", tags: ["Wounds","C"] },
+    { name: "Superficial open wound dressing", tags: ["Wounds","C"] },
+    { name: "Open wound packing", tags: ["Wounds","C"] },
+
+    // Burns
+    { name: "Burn first aid", tags: ["Burns","C"] },
+    { name: "Primary burn dressing", tags: ["Burns","C"] },
+    { name: "Escharotomy", tags: ["Burns","LS"] },
+
+    // Minor surgical
+    { name: "Removal of superficial & subcutaneous foreign bodies", tags: ["Minor surgery","C"] },
+    { name: "Incision and drainage of simple, superficial abscesses", tags: ["Minor surgery","C"] },
+    { name: "Drainage of a paronychia", tags: ["Minor surgery","C"] },
+    { name: "Drainage of a subungual haematoma", tags: ["Minor surgery","C"] },
+    { name: "Incision and drainage of a thrombosed external haemorrhoid", tags: ["Minor surgery","C"] },
+    { name: "Drainage of peritonsillar abscess", tags: ["Minor surgery"] },
+    { name: "Nail bed repair", tags: ["Minor surgery","C"] },
+
+    // O&G
+    { name: "Vaginal speculum insertion", tags: ["O&G","C"] },
+    { name: "Removal of products of conception from cervical os", tags: ["O&G","C","LS"] },
+    { name: "Use of foetal doppler", tags: ["O&G","C"] },
+    { name: "Spontaneous vaginal delivery", tags: ["O&G","LS"] },
+
+    // Microbiology
+    { name: "Collection of blood culture", tags: ["Microbiology","C"] },
+    { name: "Lumbar puncture + measurement of CSF opening pressure", tags: ["Microbiology","C"] },
+    { name: "Paediatric non-invasive urine collection", tags: ["Microbiology","C"] },
+    { name: "Collection of swabs", tags: ["Microbiology","C"] },
+    { name: "Nasopharyngeal aspirate collection", tags: ["Microbiology","C"] },
+
+    // ENT
+    { name: "Removal of nasal foreign bodies", tags: ["ENT","C"] },
+    { name: "Removal of aural foreign bodies", tags: ["ENT","C"] },
+    { name: "Removal of laryngeal foreign bodies", tags: ["ENT","C"] },
+    { name: "Nasal speculum insertion", tags: ["ENT","C"] },
+    { name: "Nasal cautery", tags: ["ENT","C"] },
+    { name: "Anterior nasal packing", tags: ["ENT","C","LS"] },
+    { name: "Posterior nasal packing", tags: ["ENT","LS"] },
+    { name: "Aural toilet", tags: ["ENT","C"] },
+    { name: "Aural wick insertion", tags: ["ENT","C"] },
+
+    // Ophthalmology
+    { name: "Removal of corneal foreign bodies", tags: ["Ophthalmology","C"] },
+    { name: "Direct ophthalmoscopy", tags: ["Ophthalmology","C"] },
+    { name: "Use of a slit lamp in the eye examination", tags: ["Ophthalmology","C"] },
+    { name: "Tonometry", tags: ["Ophthalmology","C"] },
+    { name: "Eye irrigation", tags: ["Ophthalmology","C","LS"] },
+    { name: "Application of an eye pad or shield", tags: ["Ophthalmology","C"] },
+    { name: "Lateral canthotomy", tags: ["Ophthalmology","LS"] },
+
+    // Dental
+    { name: "Joint reduction: temporo-mandibular joint", tags: ["Dental","C"] },
+    { name: "Enlocation avulsed/extruded/intruded/laterally injured tooth", tags: ["Dental","C"] },
+    { name: "Temporary stabilisation of injured tooth", tags: ["Dental","C"] },
+    { name: "Haemostasis following dental extraction", tags: ["Dental","C"] },
+
+    // Ultrasound
+    { name: "Focused Echocardiography in Life Support (FELS)", tags: ["Ultrasound","C"] },
+    { name: "FAST or eFAST", tags: ["Ultrasound","C"] },
+    { name: "Pneumothorax / haemothorax detection", tags: ["Ultrasound","C"] },
+    { name: "Detection & characterisation of an abdominal aortic aneurysm", tags: ["Ultrasound","C"] },
+    { name: "Guided peripheral vascular access", tags: ["Ultrasound","C"] },
+    { name: "Guided central vascular access", tags: ["Ultrasound","C"] },
+    { name: "Ultrasound guided nerve blocks", tags: ["Ultrasound"] },
+    { name: "Identification of distended bladder", tags: ["Ultrasound","C"] },
+
+    // Tox / GI decontamination / Environmental
+    { name: "Pressure immobilisation bandage", tags: ["Toxicology","C","LS"] },
+    { name: "Gastric decontamination / whole bowel irrigation", tags: ["GI decontamination","LS"] },
+    { name: "Basic warming and cooling techniques (external methods, IV fluids)", tags: ["Environmental","C","LS"] },
+    { name: "Advanced warming and cooling techniques", tags: ["Environmental","LS"] }
+  ];
+
+  // ------- state / storage -------
+  const KEY = "facem_proc_randomiser_tagged_v1";
+  let state = load();
+  let currentName = null;
+
+  function $(id){ return document.getElementById(id); }
+
+  function load(){
+    const raw = localStorage.getItem(KEY);
+    if (!raw){
+      const fresh = { procedures: BUILTIN_PROCEDURES, meta: {}, log: [] };
+      save(fresh);
+      return fresh;
+    }
+    try{
+      const parsed = JSON.parse(raw);
+      // basic validation
+      if (!parsed.procedures || !Array.isArray(parsed.procedures)) throw new Error("bad");
+      if (!parsed.meta) parsed.meta = {};
+      if (!parsed.log) parsed.log = [];
+      // ensure each procedure has tags array
+      parsed.procedures = parsed.procedures.map(p => ({
+        name: String(p.name || "").trim(),
+        tags: Array.isArray(p.tags) ? p.tags.map(String) : []
+      })).filter(p => p.name);
+      return parsed;
+    } catch(e){
+      localStorage.removeItem(KEY);
+      return load();
+    }
   }
-  try { return JSON.parse(raw); } catch {
-    localStorage.removeItem(KEY);
-    return loadState();
+  function save(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+
+  function ensureMeta(name){
+    if (!state.meta[name]) state.meta[name] = { count: 0, last: null, done: false };
+    return state.meta[name];
   }
-}
 
-function saveState(state) {
-  localStorage.setItem(KEY, JSON.stringify(state));
-}
+  function formatDate(iso){
+    if (!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+  }
 
-function ensureMeta(state, name) {
-  if (!state.meta[name]) state.meta[name] = { count: 0, last: null, done: false };
-  return state.meta[name];
-}
+  function unique(arr){
+    return [...new Set(arr)];
+  }
 
-/** =========================
- *  Random selection
- *  ========================= */
-function pickRandom(state, opts) {
-  const list = state.procedures.slice();
-  const eligible = list.filter(name => {
-    const m = ensureMeta(state, name);
-    if (opts.onlyNotDone && m.done) return false;
-    return true;
-  });
-  if (eligible.length === 0) return null;
+  function computeTotals(){
+    const total = state.procedures.length;
+    let reviewed = 0, done = 0;
+    for (const p of state.procedures){
+      const m = ensureMeta(p.name);
+      if (m.count > 0) reviewed++;
+      if (m.done) done++;
+    }
+    $("pillTotals").textContent = `${total} procedures • Reviewed: ${reviewed} • Done: ${done}`;
+  }
 
-  // Weighting: prefer unreviewed/least-reviewed (inverse of count+1)
-  if (opts.preferUnreviewed) {
-    const weights = eligible.map(name => {
-      const m = ensureMeta(state, name);
-      // lower count => higher weight
-      return 1 / (m.count + 1);
+  function buildFilters(){
+    const domains = unique(state.procedures.map(p => p.tags[0]).filter(Boolean)).sort();
+    const filterDomain = $("filterDomain");
+    const filterCategory = $("filterCategory");
+
+    filterDomain.innerHTML = [
+      `<option value="ALL">All domains</option>`,
+      ...domains.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`)
+    ].join("");
+
+    filterCategory.innerHTML = `
+      <option value="ALL">All categories</option>
+      <option value="C">Common ED (C)</option>
+      <option value="LS">Life/limb/sight saving (LS)</option>
+    `;
+  }
+
+  function getEligible(){
+    const onlyNotDone = $("chkOnlyNotDone").checked;
+    const preferLeast = $("chkPreferLeast").checked;
+
+    const domain = $("filterDomain").value;
+    const category = $("filterCategory").value;
+
+    let list = state.procedures.slice();
+
+    if (domain !== "ALL"){
+      list = list.filter(p => p.tags.includes(domain));
+    }
+    if (category !== "ALL"){
+      list = list.filter(p => p.tags.includes(category));
+    }
+    list = list.filter(p => {
+      const m = ensureMeta(p.name);
+      return !(onlyNotDone && m.done);
     });
+
+    return { list, preferLeast };
+  }
+
+  function pickRandom(){
+    const { list, preferLeast } = getEligible();
+    if (!list.length) return null;
+
+    if (!preferLeast){
+      return list[Math.floor(Math.random()*list.length)].name;
+    }
+    // weighted: 1/(count+1)
+    const weights = list.map(p => 1/(ensureMeta(p.name).count + 1));
     const total = weights.reduce((a,b)=>a+b,0);
     let r = Math.random() * total;
-    for (let i=0; i<eligible.length; i++) {
+    for (let i=0;i<list.length;i++){
       r -= weights[i];
-      if (r <= 0) return eligible[i];
+      if (r <= 0) return list[i].name;
     }
+    return list[list.length-1].name;
   }
-  return eligible[Math.floor(Math.random() * eligible.length)];
-}
 
-/** =========================
- *  UI
- *  ========================= */
-let state = loadState();
-let current = null;
-
-const $ = (id) => document.getElementById(id);
-
-function formatDate(iso) {
-  if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-}
-
-function renderCurrent() {
-  const wrap = $("currentWrap");
-  if (!current) { wrap.style.display = "none"; return; }
-  wrap.style.display = "block";
-  $("currentProcedure").textContent = current;
-
-  const m = ensureMeta(state, current);
-  $("statsPill").textContent = `Reviewed: ${m.count}`;
-  $("lastReviewedPill").textContent = `Last: ${formatDate(m.last)}`;
-  $("btnToggleDone").textContent = m.done ? "⭐ Mark Not Done" : "⭐ Mark Done";
-
-  // log
-  const recent = state.log.filter(x => x.name === current).slice(-10).reverse();
-  $("logList").innerHTML = recent.length
-    ? recent.map(x => `<div>• ${formatDate(x.when)} — ${escapeHtml(x.notes || "(no notes)")}</div>`).join("")
-    : "<div>—</div>";
-}
-
-function escapeHtml(s) {
-  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-
-function renderTracker() {
-  const body = $("trackerBody");
-  const q = $("search").value.trim().toLowerCase();
-  const mode = $("sortMode").value;
-
-  let rows = state.procedures
-    .filter(name => name.toLowerCase().includes(q))
-    .map(name => ({ name, meta: ensureMeta(state, name) }));
-
-  const by = {
-    least: (a,b) => a.meta.count - b.meta.count || a.name.localeCompare(b.name),
-    most:  (a,b) => b.meta.count - a.meta.count || a.name.localeCompare(b.name),
-    alpha: (a,b) => a.name.localeCompare(b.name),
-    recent:(a,b) => (b.meta.last || "").localeCompare(a.meta.last || "") || a.name.localeCompare(b.name),
-    done:  (a,b) => (b.meta.done - a.meta.done) || a.name.localeCompare(b.name)
-  }[mode];
-
-  rows.sort(by);
-
-  body.innerHTML = rows.map(({name, meta}) => `
-    <tr>
-      <td>${escapeHtml(name)}</td>
-      <td class="right">${meta.count}</td>
-      <td>${escapeHtml(formatDate(meta.last))}</td>
-      <td>${meta.done ? "✅" : "—"}</td>
-      <td class="right">
-        <button onclick="doQuickReview(${JSON.stringify(name)})">+1</button>
-        <button onclick="toggleDone(${JSON.stringify(name)})">Done</button>
-        <button onclick="removeProcedure(${JSON.stringify(name)})">Remove</button>
-      </td>
-    </tr>
-  `).join("");
-}
-
-function syncBulkEditor() {
-  $("bulkList").value = state.procedures.join("\n");
-}
-
-/** =========================
- *  Actions
- *  ========================= */
-function doRandom() {
-  const picked = pickRandom(state, {
-    preferUnreviewed: $("chkPreferUnreviewed").checked,
-    onlyNotDone: $("chkOnlyNotDone").checked
-  });
-  if (!picked) {
-    alert("No eligible procedures (maybe all marked done and 'only not done' is on).");
-    return;
+  function getProc(name){
+    return state.procedures.find(p => p.name === name);
   }
-  current = picked;
-  $("notes").value = "";
-  renderCurrent();
-}
 
-function markReviewed(name, notes) {
-  const m = ensureMeta(state, name);
-  m.count += 1;
-  m.last = new Date().toISOString();
-  state.log.push({ name, when: m.last, notes: notes || "" });
-  // cap log size
-  if (state.log.length > 2000) state.log = state.log.slice(-2000);
-  saveState(state);
-  renderCurrent();
-  renderTracker();
-}
-
-function toggleDone(name) {
-  const m = ensureMeta(state, name);
-  m.done = !m.done;
-  saveState(state);
-  renderCurrent();
-  renderTracker();
-}
-
-function removeProcedure(name) {
-  if (!confirm(`Remove "${name}" from the list? (History stays in backup only)`)) return;
-  state.procedures = state.procedures.filter(x => x !== name);
-  saveState(state);
-  if (current === name) current = null;
-  syncBulkEditor();
-  renderCurrent();
-  renderTracker();
-}
-
-function addProcedure(name) {
-  name = (name || "").trim();
-  if (!name) return;
-  if (state.procedures.includes(name)) { alert("Already exists."); return; }
-  state.procedures.push(name);
-  ensureMeta(state, name);
-  saveState(state);
-  syncBulkEditor();
-  renderTracker();
-}
-
-/** Expose a few functions for inline buttons */
-window.doQuickReview = (name) => markReviewed(name, "");
-window.toggleDone = (name) => toggleDone(name);
-window.removeProcedure = (name) => removeProcedure(name);
-
-/** =========================
- *  Backup / import / export
- *  ========================= */
-function exportJson() {
-  $("backup").value = JSON.stringify(state, null, 2);
-}
-
-function importJson() {
-  const txt = $("backup").value.trim();
-  if (!txt) return alert("Paste JSON first.");
-  try {
-    const incoming = JSON.parse(txt);
-    if (!incoming || !Array.isArray(incoming.procedures) || typeof incoming.meta !== "object") {
-      return alert("JSON format not recognised.");
+  function renderCurrent(){
+    if (!currentName){
+      $("currentWrap").style.display = "none";
+      $("hintLine").style.display = "block";
+      return;
     }
-    state = incoming;
-    saveState(state);
-    current = null;
-    syncBulkEditor();
+    $("hintLine").style.display = "none";
+    $("currentWrap").style.display = "block";
+    $("currentName").textContent = currentName;
+
+    const proc = getProc(currentName);
+    const tags = proc ? proc.tags : [];
+    $("currentTags").innerHTML = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
+
+    const m = ensureMeta(currentName);
+    $("statLine").textContent = `Reviewed: ${m.count} • Last: ${formatDate(m.last)}`;
+    $("donePill").textContent = m.done ? "Done: ✅" : "Done: —";
+    $("btnToggleDone").textContent = m.done ? "⭐ Mark not-done" : "⭐ Mark done";
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  function renderTracker(){
+    const q = $("search").value.trim().toLowerCase();
+    const mode = $("sortMode").value;
+
+    let rows = state.procedures
+      .filter(p => p.name.toLowerCase().includes(q) || (p.tags.join(" ").toLowerCase().includes(q)))
+      .map(p => ({ p, m: ensureMeta(p.name) }));
+
+    const sorter = {
+      least: (a,b) => a.m.count - b.m.count || a.p.name.localeCompare(b.p.name),
+      recent:(a,b) => (b.m.last || "").localeCompare(a.m.last || "") || a.p.name.localeCompare(b.p.name),
+      alpha: (a,b) => a.p.name.localeCompare(b.p.name),
+      done:  (a,b) => (b.m.done - a.m.done) || a.p.name.localeCompare(b.p.name)
+    }[mode];
+
+    rows.sort(sorter);
+
+    $("tbody").innerHTML = rows.map(({p,m}) => `
+      <tr>
+        <td>${escapeHtml(p.name)}</td>
+        <td class="small">${escapeHtml(p.tags.join(", "))}</td>
+        <td class="right">${m.count}</td>
+        <td class="small">${escapeHtml(formatDate(m.last))}</td>
+        <td>${m.done ? "✅" : "—"}</td>
+        <td class="right">
+          <button class="btn" onclick="quickReview(${JSON.stringify(p.name)})">+1</button>
+          <button class="btn secondary" onclick="toggleDone(${JSON.stringify(p.name)})">Done</button>
+        </td>
+      </tr>
+    `).join("");
+
+    computeTotals();
+  }
+
+  function markReviewed(name, notes){
+    const m = ensureMeta(name);
+    m.count += 1;
+    m.last = new Date().toISOString();
+    state.log.push({ name, when: m.last, notes: notes || "" });
+    if (state.log.length > 2000) state.log = state.log.slice(-2000);
+    save(state);
     renderCurrent();
     renderTracker();
-    alert("Imported.");
-  } catch (e) {
-    alert("Invalid JSON.");
   }
-}
 
-function applyBulkList() {
-  const lines = $("bulkList").value
-    .split("\n")
-    .map(x => x.trim())
-    .filter(Boolean);
-
-  // Deduplicate while preserving order
-  const unique = [];
-  const seen = new Set();
-  for (const n of lines) {
-    if (!seen.has(n)) { unique.push(n); seen.add(n); }
+  function toggleDone(name){
+    const m = ensureMeta(name);
+    m.done = !m.done;
+    save(state);
+    renderCurrent();
+    renderTracker();
   }
-  state.procedures = unique;
-  // keep meta when names match, init when new
-  for (const n of state.procedures) ensureMeta(state, n);
-  saveState(state);
-  renderTracker();
-  alert("Applied list.");
-}
 
-function resetAll() {
-  if (!confirm("Reset ALL data (procedure list + tracking) in this browser?")) return;
-  localStorage.removeItem(KEY);
-  state = loadState();
-  current = null;
-  syncBulkEditor();
+  // expose for table buttons
+  window.quickReview = (name) => markReviewed(name, "");
+  window.toggleDone = (name) => toggleDone(name);
+
+  // ------- backup / restore -------
+  function exportJson(){
+    $("backup").value = JSON.stringify(state, null, 2);
+  }
+  function importJson(){
+    const txt = $("backup").value.trim();
+    if (!txt) return alert("Paste backup JSON first.");
+    try{
+      const incoming = JSON.parse(txt);
+      if (!incoming || !Array.isArray(incoming.procedures)) return alert("Backup format not recognised.");
+      state = incoming;
+      if (!state.meta) state.meta = {};
+      if (!state.log) state.log = [];
+      save(state);
+      currentName = null;
+      buildFilters();
+      renderCurrent();
+      renderTracker();
+      alert("Imported.");
+    } catch(e){
+      alert("Invalid JSON.");
+    }
+  }
+  function resetAll(){
+    if (!confirm("Reset ALL data (including progress) in this browser?")) return;
+    localStorage.removeItem(KEY);
+    state = load();
+    currentName = null;
+    buildFilters();
+    renderCurrent();
+    renderTracker();
+  }
+
+  // ------- custom list override -------
+  function applyCustom(){
+    const txt = $("customList").value.trim();
+    if (!txt) return alert("Paste JSON list first.");
+    try{
+      const arr = JSON.parse(txt);
+      if (!Array.isArray(arr)) return alert("JSON must be an array.");
+      const cleaned = arr.map(x => ({
+        name: String(x.name || "").trim(),
+        tags: Array.isArray(x.tags) ? x.tags.map(String) : []
+      })).filter(x => x.name);
+
+      // replace procedures, keep meta keys where names match
+      state.procedures = cleaned;
+      for (const p of cleaned) ensureMeta(p.name);
+      save(state);
+
+      currentName = null;
+      buildFilters();
+      renderCurrent();
+      renderTracker();
+      alert("Applied custom list.");
+    } catch(e){
+      alert("Invalid JSON.");
+    }
+  }
+  function restoreBuiltIn(){
+    if (!confirm("Restore built-in FACEM list?")) return;
+    state.procedures = BUILTIN_PROCEDURES.slice();
+    for (const p of state.procedures) ensureMeta(p.name);
+    save(state);
+    currentName = null;
+    buildFilters();
+    renderCurrent();
+    renderTracker();
+  }
+
+  // ------- wiring -------
+  $("btnRandom").addEventListener("click", () => {
+    // show filters after first pick
+    buildFilters();
+
+    const picked = pickRandom();
+    if (!picked){
+      return alert("No eligible procedures with the current filters. Try loosening filters or unchecking 'only not-done'.");
+    }
+    currentName = picked;
+    $("notes").value = "";
+    renderCurrent();
+  });
+
+  $("btnSkip").addEventListener("click", () => $("btnRandom").click());
+
+  $("btnReviewed").addEventListener("click", () => {
+    if (!currentName) return;
+    markReviewed(currentName, $("notes").value);
+  });
+
+  $("btnToggleDone").addEventListener("click", () => {
+    if (!currentName) return;
+    toggleDone(currentName);
+  });
+
+  $("filterDomain").addEventListener("change", () => {
+    // re-render tracker and allow next pick to use filter
+    renderTracker();
+  });
+  $("filterCategory").addEventListener("change", () => renderTracker());
+  $("chkPreferLeast").addEventListener("change", () => renderTracker());
+  $("chkOnlyNotDone").addEventListener("change", () => renderTracker());
+
+  $("sortMode").addEventListener("change", renderTracker);
+  $("search").addEventListener("input", renderTracker);
+
+  $("btnExport").addEventListener("click", exportJson);
+  $("btnImport").addEventListener("click", importJson);
+  $("btnReset").addEventListener("click", resetAll);
+
+  $("btnApplyCustom").addEventListener("click", applyCustom);
+  $("btnRestoreBuiltIn").addEventListener("click", restoreBuiltIn);
+
+  // init
+  buildFilters();
   renderCurrent();
   renderTracker();
-}
-
-/** =========================
- *  Wire up events
- *  ========================= */
-$("btnRandom").addEventListener("click", doRandom);
-$("btnSkip").addEventListener("click", () => { doRandom(); });
-$("btnMarkReviewed").addEventListener("click", () => {
-  if (!current) return;
-  markReviewed(current, $("notes").value);
-});
-$("btnToggleDone").addEventListener("click", () => {
-  if (!current) return;
-  toggleDone(current);
-});
-$("btnAdd").addEventListener("click", () => {
-  addProcedure($("newProcedure").value);
-  $("newProcedure").value = "";
-});
-$("btnClear").addEventListener("click", resetAll);
-
-$("btnExport").addEventListener("click", exportJson);
-$("btnImport").addEventListener("click", importJson);
-$("btnApplyList").addEventListener("click", applyBulkList);
-
-$("sortMode").addEventListener("change", renderTracker);
-$("search").addEventListener("input", renderTracker);
-
-/** Init */
-syncBulkEditor();
-renderTracker();
 </script>
 </body>
 </html>
