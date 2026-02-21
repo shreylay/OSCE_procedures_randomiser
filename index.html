@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Procedure Randomiser + Tracker</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; line-height: 1.4; }
+    h1 { margin: 0 0 10px; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    button { padding: 10px 14px; border-radius: 10px; border: 1px solid #8884; cursor: pointer; }
+    button.primary { font-weight: 650; }
+    button.danger { border-color: #c004; }
+    input, textarea, select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #8884; }
+    textarea { min-height: 70px; resize: vertical; }
+    .card { border: 1px solid #8884; border-radius: 14px; padding: 16px; margin: 14px 0; }
+    .big { font-size: 1.5rem; font-weight: 750; margin: 10px 0 0; }
+    .muted { opacity: 0.75; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 880px) { .grid { grid-template-columns: 1.2fr 0.8fr; } }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.95rem; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #8883; text-align: left; }
+    th { position: sticky; top: 0; background: color-mix(in srgb, Canvas 92%, transparent); backdrop-filter: blur(6px); }
+    .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; border: 1px solid #8884; font-size: 0.85rem; }
+    .right { text-align: right; }
+    .split { display: grid; grid-template-columns: 1fr; gap: 10px; }
+    @media (min-width: 640px) { .split { grid-template-columns: 1fr 1fr; } }
+    details { margin-top: 10px; }
+    .footer { margin-top: 18px; font-size: 0.9rem; opacity: 0.75; }
+  </style>
+</head>
+<body>
+  <h1>Procedure Randomiser</h1>
+  <div class="muted">Offline-first. Saves your progress in this browser (localStorage).</div>
+
+  <div class="grid">
+    <!-- LEFT: Randomiser -->
+    <div class="card">
+      <div class="row">
+        <button class="primary" id="btnRandom">🎲 Random procedure</button>
+
+        <label class="row" style="gap:8px;">
+          <input type="checkbox" id="chkPreferUnreviewed" checked />
+          <span>Prefer unreviewed / least-reviewed</span>
+        </label>
+
+        <label class="row" style="gap:8px;">
+          <input type="checkbox" id="chkOnlyNotDone" />
+          <span>Only pick “not done”</span>
+        </label>
+      </div>
+
+      <div id="currentWrap" style="margin-top: 10px; display:none;">
+        <div class="muted">Current pick</div>
+        <div class="big" id="currentProcedure"></div>
+        <div class="row" style="margin-top: 10px;">
+          <span class="pill" id="statsPill"></span>
+          <span class="pill" id="lastReviewedPill"></span>
+        </div>
+
+        <div style="margin-top: 12px;">
+          <label for="notes"><span class="muted">Notes (optional)</span></label>
+          <textarea id="notes" placeholder="Key steps / pitfalls / doses / anatomy landmarks / complications…"></textarea>
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+          <button id="btnMarkReviewed">✅ Mark as reviewed</button>
+          <button id="btnToggleDone">⭐ Toggle Done</button>
+          <button id="btnSkip">↩︎ Skip (no log)</button>
+        </div>
+
+        <details>
+          <summary>Show last 10 review log entries</summary>
+          <div id="logList" class="muted" style="margin-top: 8px;"></div>
+        </details>
+      </div>
+    </div>
+
+    <!-- RIGHT: Add/edit procedures + backup -->
+    <div class="card">
+      <h3 style="margin-top:0;">Setup</h3>
+
+      <div class="split">
+        <div>
+          <label class="muted">Add a procedure</label>
+          <input id="newProcedure" placeholder="e.g., Chest drain (Seldinger)" />
+        </div>
+        <div class="row" style="align-items:flex-end;">
+          <button id="btnAdd">Add</button>
+          <button class="danger" id="btnClear" title="Deletes all tracked history in this browser">Reset all data</button>
+        </div>
+      </div>
+
+      <details>
+        <summary>Import / Export backup</summary>
+        <p class="muted">Use this to move your progress to another device.</p>
+        <div class="row">
+          <button id="btnExport">Export JSON</button>
+          <button id="btnImport">Import JSON</button>
+        </div>
+        <textarea id="backup" placeholder="Paste exported JSON here to import"></textarea>
+      </details>
+
+      <details>
+        <summary>Edit procedure list (advanced)</summary>
+        <p class="muted">One procedure per line. Click “Apply list” to overwrite the list (history kept when names match).</p>
+        <textarea id="bulkList"></textarea>
+        <div class="row">
+          <button id="btnApplyList">Apply list</button>
+        </div>
+      </details>
+
+      <div class="footer">
+        Tip: if you host this on GitHub Pages, progress stays per-browser/device unless you import/export.
+      </div>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="card">
+    <div class="row" style="justify-content: space-between;">
+      <h3 style="margin:0;">Tracker</h3>
+      <div class="row">
+        <label class="row" style="gap:8px;">
+          <span class="muted">Sort</span>
+          <select id="sortMode">
+            <option value="least">Least reviewed</option>
+            <option value="most">Most reviewed</option>
+            <option value="alpha">A → Z</option>
+            <option value="recent">Most recently reviewed</option>
+            <option value="done">Done first</option>
+          </select>
+        </label>
+        <input id="search" placeholder="Search…" style="width: 220px;" />
+      </div>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Procedure</th>
+          <th class="right">Reviewed</th>
+          <th>Last reviewed</th>
+          <th>Done</th>
+          <th class="right">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="trackerBody"></tbody>
+    </table>
+  </div>
+
+<script>
+/** =========================
+ *  CONFIG: Edit your list here
+ *  ========================= */
+const DEFAULT_PROCEDURES = [
+  "Airway: RSI (adult)",
+  "Airway: RSI (paediatric)",
+  "Ventilation: NIV setup + troubleshooting",
+  "Cricothyrotomy (scalpel-bougie)",
+  "Central venous catheter (US-guided)",
+  "Arterial line",
+  "Chest drain (Seldinger)",
+  "Needle decompression",
+  "Pericardiocentesis",
+  "Lumbar puncture (adult)",
+  "Lumbar puncture (neonate)",
+  "Procedural sedation (adult)",
+  "Procedural sedation (paeds)",
+  "Suprapubic aspiration",
+  "Shoulder reduction (various techniques)",
+  "Hip reduction",
+  "IO access",
+  "Nerve block: fascia iliaca",
+  "Nerve block: digital block",
+  "Wound: complex laceration repair"
+];
+
+/** =========================
+ *  Storage helpers
+ *  ========================= */
+const KEY = "procedure_randomiser_v1";
+
+function loadState() {
+  const raw = localStorage.getItem(KEY);
+  if (!raw) {
+    const fresh = {
+      procedures: DEFAULT_PROCEDURES,
+      meta: {},   // name -> {count, last, done}
+      log: []     // {name, when, notes}
+    };
+    saveState(fresh);
+    return fresh;
+  }
+  try { return JSON.parse(raw); } catch {
+    localStorage.removeItem(KEY);
+    return loadState();
+  }
+}
+
+function saveState(state) {
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function ensureMeta(state, name) {
+  if (!state.meta[name]) state.meta[name] = { count: 0, last: null, done: false };
+  return state.meta[name];
+}
+
+/** =========================
+ *  Random selection
+ *  ========================= */
+function pickRandom(state, opts) {
+  const list = state.procedures.slice();
+  const eligible = list.filter(name => {
+    const m = ensureMeta(state, name);
+    if (opts.onlyNotDone && m.done) return false;
+    return true;
+  });
+  if (eligible.length === 0) return null;
+
+  // Weighting: prefer unreviewed/least-reviewed (inverse of count+1)
+  if (opts.preferUnreviewed) {
+    const weights = eligible.map(name => {
+      const m = ensureMeta(state, name);
+      // lower count => higher weight
+      return 1 / (m.count + 1);
+    });
+    const total = weights.reduce((a,b)=>a+b,0);
+    let r = Math.random() * total;
+    for (let i=0; i<eligible.length; i++) {
+      r -= weights[i];
+      if (r <= 0) return eligible[i];
+    }
+  }
+  return eligible[Math.floor(Math.random() * eligible.length)];
+}
+
+/** =========================
+ *  UI
+ *  ========================= */
+let state = loadState();
+let current = null;
+
+const $ = (id) => document.getElementById(id);
+
+function formatDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
+}
+
+function renderCurrent() {
+  const wrap = $("currentWrap");
+  if (!current) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  $("currentProcedure").textContent = current;
+
+  const m = ensureMeta(state, current);
+  $("statsPill").textContent = `Reviewed: ${m.count}`;
+  $("lastReviewedPill").textContent = `Last: ${formatDate(m.last)}`;
+  $("btnToggleDone").textContent = m.done ? "⭐ Mark Not Done" : "⭐ Mark Done";
+
+  // log
+  const recent = state.log.filter(x => x.name === current).slice(-10).reverse();
+  $("logList").innerHTML = recent.length
+    ? recent.map(x => `<div>• ${formatDate(x.when)} — ${escapeHtml(x.notes || "(no notes)")}</div>`).join("")
+    : "<div>—</div>";
+}
+
+function escapeHtml(s) {
+  return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+}
+
+function renderTracker() {
+  const body = $("trackerBody");
+  const q = $("search").value.trim().toLowerCase();
+  const mode = $("sortMode").value;
+
+  let rows = state.procedures
+    .filter(name => name.toLowerCase().includes(q))
+    .map(name => ({ name, meta: ensureMeta(state, name) }));
+
+  const by = {
+    least: (a,b) => a.meta.count - b.meta.count || a.name.localeCompare(b.name),
+    most:  (a,b) => b.meta.count - a.meta.count || a.name.localeCompare(b.name),
+    alpha: (a,b) => a.name.localeCompare(b.name),
+    recent:(a,b) => (b.meta.last || "").localeCompare(a.meta.last || "") || a.name.localeCompare(b.name),
+    done:  (a,b) => (b.meta.done - a.meta.done) || a.name.localeCompare(b.name)
+  }[mode];
+
+  rows.sort(by);
+
+  body.innerHTML = rows.map(({name, meta}) => `
+    <tr>
+      <td>${escapeHtml(name)}</td>
+      <td class="right">${meta.count}</td>
+      <td>${escapeHtml(formatDate(meta.last))}</td>
+      <td>${meta.done ? "✅" : "—"}</td>
+      <td class="right">
+        <button onclick="doQuickReview(${JSON.stringify(name)})">+1</button>
+        <button onclick="toggleDone(${JSON.stringify(name)})">Done</button>
+        <button onclick="removeProcedure(${JSON.stringify(name)})">Remove</button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+function syncBulkEditor() {
+  $("bulkList").value = state.procedures.join("\n");
+}
+
+/** =========================
+ *  Actions
+ *  ========================= */
+function doRandom() {
+  const picked = pickRandom(state, {
+    preferUnreviewed: $("chkPreferUnreviewed").checked,
+    onlyNotDone: $("chkOnlyNotDone").checked
+  });
+  if (!picked) {
+    alert("No eligible procedures (maybe all marked done and 'only not done' is on).");
+    return;
+  }
+  current = picked;
+  $("notes").value = "";
+  renderCurrent();
+}
+
+function markReviewed(name, notes) {
+  const m = ensureMeta(state, name);
+  m.count += 1;
+  m.last = new Date().toISOString();
+  state.log.push({ name, when: m.last, notes: notes || "" });
+  // cap log size
+  if (state.log.length > 2000) state.log = state.log.slice(-2000);
+  saveState(state);
+  renderCurrent();
+  renderTracker();
+}
+
+function toggleDone(name) {
+  const m = ensureMeta(state, name);
+  m.done = !m.done;
+  saveState(state);
+  renderCurrent();
+  renderTracker();
+}
+
+function removeProcedure(name) {
+  if (!confirm(`Remove "${name}" from the list? (History stays in backup only)`)) return;
+  state.procedures = state.procedures.filter(x => x !== name);
+  saveState(state);
+  if (current === name) current = null;
+  syncBulkEditor();
+  renderCurrent();
+  renderTracker();
+}
+
+function addProcedure(name) {
+  name = (name || "").trim();
+  if (!name) return;
+  if (state.procedures.includes(name)) { alert("Already exists."); return; }
+  state.procedures.push(name);
+  ensureMeta(state, name);
+  saveState(state);
+  syncBulkEditor();
+  renderTracker();
+}
+
+/** Expose a few functions for inline buttons */
+window.doQuickReview = (name) => markReviewed(name, "");
+window.toggleDone = (name) => toggleDone(name);
+window.removeProcedure = (name) => removeProcedure(name);
+
+/** =========================
+ *  Backup / import / export
+ *  ========================= */
+function exportJson() {
+  $("backup").value = JSON.stringify(state, null, 2);
+}
+
+function importJson() {
+  const txt = $("backup").value.trim();
+  if (!txt) return alert("Paste JSON first.");
+  try {
+    const incoming = JSON.parse(txt);
+    if (!incoming || !Array.isArray(incoming.procedures) || typeof incoming.meta !== "object") {
+      return alert("JSON format not recognised.");
+    }
+    state = incoming;
+    saveState(state);
+    current = null;
+    syncBulkEditor();
+    renderCurrent();
+    renderTracker();
+    alert("Imported.");
+  } catch (e) {
+    alert("Invalid JSON.");
+  }
+}
+
+function applyBulkList() {
+  const lines = $("bulkList").value
+    .split("\n")
+    .map(x => x.trim())
+    .filter(Boolean);
+
+  // Deduplicate while preserving order
+  const unique = [];
+  const seen = new Set();
+  for (const n of lines) {
+    if (!seen.has(n)) { unique.push(n); seen.add(n); }
+  }
+  state.procedures = unique;
+  // keep meta when names match, init when new
+  for (const n of state.procedures) ensureMeta(state, n);
+  saveState(state);
+  renderTracker();
+  alert("Applied list.");
+}
+
+function resetAll() {
+  if (!confirm("Reset ALL data (procedure list + tracking) in this browser?")) return;
+  localStorage.removeItem(KEY);
+  state = loadState();
+  current = null;
+  syncBulkEditor();
+  renderCurrent();
+  renderTracker();
+}
+
+/** =========================
+ *  Wire up events
+ *  ========================= */
+$("btnRandom").addEventListener("click", doRandom);
+$("btnSkip").addEventListener("click", () => { doRandom(); });
+$("btnMarkReviewed").addEventListener("click", () => {
+  if (!current) return;
+  markReviewed(current, $("notes").value);
+});
+$("btnToggleDone").addEventListener("click", () => {
+  if (!current) return;
+  toggleDone(current);
+});
+$("btnAdd").addEventListener("click", () => {
+  addProcedure($("newProcedure").value);
+  $("newProcedure").value = "";
+});
+$("btnClear").addEventListener("click", resetAll);
+
+$("btnExport").addEventListener("click", exportJson);
+$("btnImport").addEventListener("click", importJson);
+$("btnApplyList").addEventListener("click", applyBulkList);
+
+$("sortMode").addEventListener("change", renderTracker);
+$("search").addEventListener("input", renderTracker);
+
+/** Init */
+syncBulkEditor();
+renderTracker();
+</script>
+</body>
+</html>
