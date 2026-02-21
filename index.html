@@ -3,18 +3,18 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FACEM Procedure Randomiser</title>
+  <title>ACEM OSCE Procedure</title>
   <style>
     :root{
       --bg: #0b1220;
-      --card: rgba(255,255,255,0.06);
-      --card2: rgba(255,255,255,0.08);
+      --panel: rgba(255,255,255,0.06);
+      --panel2: rgba(255,255,255,0.09);
       --text: rgba(255,255,255,0.92);
-      --muted: rgba(255,255,255,0.68);
+      --muted: rgba(255,255,255,0.70);
       --border: rgba(255,255,255,0.14);
-      --shadow: 0 16px 50px rgba(0,0,0,0.45);
+      --shadow: 0 18px 55px rgba(0,0,0,0.45);
       --radius: 18px;
-      --radius2: 999px;
+      --radiusPill: 999px;
     }
     *{ box-sizing:border-box; }
     body{
@@ -22,164 +22,255 @@
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
       color: var(--text);
       background:
-        radial-gradient(1200px 700px at 20% 10%, rgba(99,102,241,0.28), transparent 55%),
-        radial-gradient(900px 600px at 80% 15%, rgba(16,185,129,0.22), transparent 60%),
-        radial-gradient(1100px 700px at 60% 90%, rgba(236,72,153,0.18), transparent 60%),
+        radial-gradient(1200px 720px at 18% 8%, rgba(99,102,241,0.26), transparent 58%),
+        radial-gradient(900px 600px at 85% 12%, rgba(16,185,129,0.20), transparent 60%),
+        radial-gradient(1100px 700px at 60% 92%, rgba(236,72,153,0.16), transparent 62%),
         var(--bg);
       min-height:100vh;
-      padding: 26px 18px 40px;
+      padding: 24px 16px 420px; /* bottom padding so content doesn't hide behind tracker dock */
     }
     .container{ max-width: 1100px; margin: 0 auto; }
+
     header{
-      display:flex; gap:12px; align-items:flex-end; justify-content:space-between; flex-wrap:wrap;
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;
       margin-bottom: 14px;
     }
-    h1{ margin:0; font-size: 1.35rem; letter-spacing: 0.2px; }
-    .subtitle{ margin:0; color: var(--muted); font-size:0.95rem; }
+    h1{
+      margin:0;
+      font-size: 1.55rem;
+      letter-spacing: 0.2px;
+      font-weight: 850;
+    }
+    .subtitle{ margin:6px 0 0; color: var(--muted); font-size: 0.98rem; }
     .pill{
       display:inline-flex; align-items:center; gap:8px;
       border:1px solid var(--border);
       background: rgba(255,255,255,0.04);
       padding: 8px 12px;
-      border-radius: var(--radius2);
+      border-radius: var(--radiusPill);
       color: var(--muted);
-      font-size: 0.9rem;
+      font-size: 0.92rem;
+      white-space: nowrap;
     }
-    .grid{
-      display:grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 14px;
-      align-items:start;
-      margin-top: 12px;
-    }
-    @media (max-width: 960px){
-      .grid{ grid-template-columns: 1fr; }
-    }
+
     .card{
-      background: linear-gradient(180deg, var(--card2), var(--card));
+      background: linear-gradient(180deg, var(--panel2), var(--panel));
       border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .card-inner{ padding: 16px; }
+    .inner{ padding: 16px; }
+
+    /* Hero / main randomiser area */
     .hero{
-      min-height: 52vh;
+      min-height: 58vh;
       display:flex;
       flex-direction:column;
-      justify-content:center;
       align-items:center;
+      justify-content:center;
       text-align:center;
-      padding: 26px 18px;
       gap: 14px;
+      padding: 26px 18px;
     }
-    .hero h2{ margin:0; font-size: 1.05rem; color: var(--muted); font-weight: 600; }
+
+    .hero-title{
+      margin:0;
+      color: var(--muted);
+      font-weight: 650;
+      font-size: 1.05rem;
+    }
+
+    .hero-controls{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 2px;
+    }
+
+    label{ color: var(--muted); font-size:0.92rem; }
+    select, textarea, input[type="text"]{
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    select:focus, textarea:focus, input:focus{
+      border-color: rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.08);
+    }
+
     .hero-btn{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:10px;
-      font-size: 1.25rem;
-      font-weight: 800;
-      padding: 16px 26px;
-      border-radius: var(--radius2);
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap: 10px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      padding: 18px 28px;
+      border-radius: var(--radiusPill);
       border: 1px solid rgba(255,255,255,0.22);
       background: rgba(255,255,255,0.08);
       color: var(--text);
-      cursor: pointer;
+      cursor:pointer;
       transition: transform .06s ease, background .2s ease, border-color .2s ease;
       user-select:none;
     }
     .hero-btn:hover{
       background: rgba(255,255,255,0.12);
-      border-color: rgba(255,255,255,0.28);
+      border-color: rgba(255,255,255,0.30);
     }
     .hero-btn:active{ transform: scale(0.985); }
-    .procedure-big{
+
+    /* Procedure + timer row */
+    .proc-row{
+      width: min(980px, 100%);
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 14px;
+      flex-wrap:wrap;
       margin-top: 6px;
-      font-size: clamp(2rem, 4.2vw, 3.1rem);
-      font-weight: 900;
-      line-height: 1.12;
-      letter-spacing: 0.2px;
     }
-    .meta-row{
-      display:flex; flex-wrap:wrap; gap:10px;
-      justify-content:center;
-      margin-top: 4px;
+    .proc-box{
+      flex: 1 1 520px;
+      text-align:left;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.14);
+    }
+    .procedure-big{
+      font-size: clamp(2.0rem, 4.1vw, 3.2rem);
+      font-weight: 950;
+      line-height: 1.1;
+      margin: 6px 0 0;
+    }
+    .proc-meta{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+      color: var(--muted);
+      font-size: 0.95rem;
     }
     .tag{
-      display:inline-flex; align-items:center; gap:8px;
-      padding: 7px 11px;
-      border-radius: var(--radius2);
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: var(--radiusPill);
       border: 1px solid var(--border);
-      background: rgba(0,0,0,0.15);
+      background: rgba(255,255,255,0.04);
       color: var(--muted);
       font-size: 0.9rem;
     }
 
-    .controls{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      width: min(780px, 100%);
-      margin-top: 6px;
-    }
-    @media (max-width: 720px){
-      .controls{ grid-template-columns: 1fr; }
-    }
-    label{ display:block; font-size:0.9rem; color: var(--muted); margin-bottom: 6px; }
-    select, input[type="text"], textarea{
-      width:100%;
-      padding: 11px 12px;
-      border-radius: 14px;
+    .timer-box{
+      flex: 0 0 280px;
+      padding: 14px 16px;
+      border-radius: 16px;
       border: 1px solid var(--border);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      outline:none;
+      background: rgba(0,0,0,0.14);
+      text-align:left;
     }
-    textarea{ min-height: 92px; resize: vertical; }
-    select:focus, input:focus, textarea:focus{
-      border-color: rgba(255,255,255,0.28);
-      background: rgba(255,255,255,0.08);
+    .timer-label{ color: var(--muted); font-size: 0.95rem; }
+    .timer-display{
+      font-size: 2.05rem;
+      font-weight: 950;
+      margin-top: 6px;
+      letter-spacing: 0.8px;
     }
-    .row{
-      display:flex; gap: 10px; flex-wrap:wrap; align-items:center;
-    }
-    .toggle{
-      display:flex; gap: 10px; flex-wrap:wrap; align-items:center; justify-content:center;
-      color: var(--muted);
-      font-size:0.95rem;
-    }
-    .toggle input{ transform: scale(1.1); }
-    .actions{
-      display:flex; flex-wrap:wrap; gap: 10px; justify-content:center;
-      margin-top: 4px;
+    .timer-actions{
+      display:flex;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap:wrap;
     }
     .btn{
-      padding: 10px 14px;
+      padding: 10px 12px;
       border-radius: 14px;
       border: 1px solid var(--border);
       background: rgba(255,255,255,0.06);
       color: var(--text);
       cursor:pointer;
+      font-weight: 750;
       transition: background .2s ease;
-      font-weight: 650;
     }
     .btn:hover{ background: rgba(255,255,255,0.10); }
-    .btn.secondary{ color: var(--muted); font-weight: 650; }
+    .btn.secondary{ color: var(--muted); font-weight: 700; }
     .btn.danger{ border-color: rgba(239,68,68,0.35); }
-    .muted{ color: var(--muted); }
 
-    .section-title{
-      display:flex; align-items:center; justify-content:space-between; gap: 10px; flex-wrap:wrap;
-      padding: 14px 16px;
-      border-top: 1px solid var(--border);
+    .notes-wrap{
+      width: min(980px, 100%);
+      margin-top: 10px;
+      text-align:left;
+    }
+    textarea{ width:100%; min-height: 90px; resize: vertical; }
+
+    .actions{
+      display:flex;
+      gap: 10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top: 10px;
+    }
+
+    /* Bottom tracker dock */
+    .tracker-dock{
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+      padding: 10px 12px;
+      background: rgba(10, 18, 32, 0.76);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(255,255,255,0.14);
+    }
+    .tracker-shell{
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    .tracker-card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .tracker-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      flex-wrap:wrap;
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.10);
     }
-    .section-title h3{ margin:0; font-size: 1rem; }
-    .table-wrap{ overflow:auto; max-height: 520px; }
+    .tracker-title{
+      margin:0;
+      font-size: 1.0rem;
+      font-weight: 850;
+      color: rgba(255,255,255,0.84);
+    }
+    .tracker-controls{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .table-wrap{
+      overflow:auto;
+      max-height: 300px; /* height of docked table */
+    }
     table{
       width:100%;
       border-collapse: collapse;
-      min-width: 820px;
+      min-width: 980px;
     }
     th, td{
       padding: 10px 12px;
@@ -191,34 +282,35 @@
     th{
       position: sticky;
       top: 0;
-      background: rgba(10, 18, 32, 0.88);
+      background: rgba(10, 18, 32, 0.92);
       backdrop-filter: blur(8px);
       z-index: 1;
-      color: rgba(255,255,255,0.80);
+      color: rgba(255,255,255,0.82);
       font-size: 0.9rem;
       letter-spacing: .2px;
     }
     .right{ text-align:right; }
     .small{ font-size: 0.88rem; color: var(--muted); }
+
+    /* Backup */
     details{
-      border-top: 1px solid var(--border);
+      width: min(980px, 100%);
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,0.12);
+      overflow:hidden;
     }
     summary{
       cursor:pointer;
-      padding: 14px 16px;
-      color: rgba(255,255,255,0.82);
-      font-weight: 700;
+      padding: 12px 14px;
+      font-weight: 850;
+      color: rgba(255,255,255,0.84);
       background: rgba(0,0,0,0.10);
+      border-bottom: 1px solid rgba(255,255,255,0.10);
     }
-    .pad{ padding: 16px; }
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
-      border:1px solid var(--border);
-      border-radius: 10px;
-      padding: 2px 8px;
-      color: rgba(255,255,255,0.8);
-      background: rgba(0,0,0,0.15);
-    }
+    .backup-pad{ padding: 12px 14px; }
+    .backup-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
   </style>
 </head>
 
@@ -226,115 +318,107 @@
   <div class="container">
     <header>
       <div>
-        <h1>FACEM Procedure Randomiser</h1>
-        <p class="subtitle">Targeted revision by domain + category, with tracking saved in your browser.</p>
+        <h1>ACEM OSCE Procedure</h1>
+        <div class="subtitle">Randomiser + timer + tracking (saved in this browser).</div>
       </div>
       <div class="pill" id="pillTotals">Loading…</div>
     </header>
 
-    <div class="grid">
-      <!-- HERO -->
-      <div class="card">
-        <div class="hero">
-          <h2>Tap to generate a procedure</h2>
+    <div class="card">
+      <div class="hero">
+        <div class="hero-title">Generate a procedure and run an OSCE-style timed response</div>
 
-          <button class="hero-btn" id="btnRandom" title="Pick a random procedure">
-            🎲 Random procedure
-          </button>
-
-          <div id="currentWrap" style="display:none; width:100%;">
-            <div class="procedure-big" id="currentName"></div>
-
-            <div class="meta-row" id="currentTags"></div>
-
-            <div class="controls" style="margin: 10px auto 0;">
-              <div>
-                <label for="filterDomain">Domain filter</label>
-                <select id="filterDomain"></select>
-              </div>
-              <div>
-                <label for="filterCategory">Category filter</label>
-                <select id="filterCategory"></select>
-              </div>
-            </div>
-
-            <div class="toggle" style="margin-top: 10px;">
-              <label style="display:flex; gap:10px; align-items:center; margin:0;">
-                <input type="checkbox" id="chkPreferLeast" checked>
-                Prefer least-reviewed
-              </label>
-              <label style="display:flex; gap:10px; align-items:center; margin:0;">
-                <input type="checkbox" id="chkOnlyNotDone">
-                Only not-done
-              </label>
-            </div>
-
-            <div class="card" style="margin-top: 12px; width: min(780px, 100%);">
-              <div class="card-inner">
-                <div class="row" style="justify-content:space-between;">
-                  <div class="small" id="statLine">—</div>
-                  <div class="row">
-                    <span class="tag" id="donePill">Done: —</span>
-                  </div>
-                </div>
-
-                <label for="notes" style="margin-top:10px;">Notes (optional)</label>
-                <textarea id="notes" placeholder="Key steps / pitfalls / complications / aftercare…"></textarea>
-
-                <div class="actions">
-                  <button class="btn" id="btnReviewed">✅ Mark reviewed</button>
-                  <button class="btn" id="btnToggleDone">⭐ Toggle done</button>
-                  <button class="btn secondary" id="btnSkip">↩︎ Skip</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="muted" id="hintLine">Filters appear after the first pick.</div>
+        <div class="hero-controls">
+          <label for="filterTheme">Filter:</label>
+          <select id="filterTheme" aria-label="Filter theme">
+            <option value="ALL" selected>All procedures</option>
+            <option value="C">Common (C)</option>
+            <option value="LS">Life-saving (LS)</option>
+            <option value="C+LS">Common + Life-saving</option>
+          </select>
         </div>
 
-        <details>
-          <summary>Backup / Restore progress</summary>
-          <div class="pad">
-            <div class="muted">Your tracking is stored in this browser (localStorage). Use backup to move it to another device.</div>
-            <div class="row" style="margin-top: 10px;">
-              <button class="btn" id="btnExport">Export JSON</button>
-              <button class="btn" id="btnImport">Import JSON</button>
-              <button class="btn danger" id="btnReset">Reset ALL data</button>
-            </div>
-            <textarea id="backup" placeholder="Export appears here (or paste backup JSON to import)." style="margin-top:10px;"></textarea>
-          </div>
-        </details>
+        <button class="hero-btn" id="btnRandom">🎲 Random procedure</button>
 
-        <details>
-          <summary>Edit procedure list (advanced)</summary>
-          <div class="pad">
-            <div class="muted">
-              This page comes preloaded with the FACEM procedures + tags. You can override the list by pasting JSON (format below) and clicking Apply.
-              <br><br>
-              Format (array of objects): <span class="kbd">[{ "name": "...", "tags": ["Airway","C","LS"] }]</span>
+        <div id="currentWrap" style="display:none; width:100%;">
+          <div class="proc-row">
+            <div class="proc-box">
+              <div class="small">Generated procedure</div>
+              <div class="procedure-big" id="currentName"></div>
+
+              <div class="proc-meta">
+                <span class="tag" id="tagTheme">—</span>
+                <span class="tag" id="tagReviewed">Reviewed: —</span>
+                <span class="tag" id="tagLast">Last: —</span>
+                <span class="tag" id="tagDone">Done: —</span>
+              </div>
             </div>
-            <textarea id="customList" placeholder='Paste JSON list here if you want to override the built-in list.' style="margin-top:10px;"></textarea>
-            <div class="row" style="margin-top:10px;">
-              <button class="btn" id="btnApplyCustom">Apply custom list</button>
-              <button class="btn secondary" id="btnRestoreBuiltIn">Restore built-in FACEM list</button>
+
+            <div class="timer-box">
+              <div class="timer-label">Timer</div>
+              <div class="timer-display" id="timerDisplay">02:00</div>
+
+              <label for="timerPreset" class="small" style="display:block; margin-top:10px;">Preset</label>
+              <select id="timerPreset">
+                <option value="60">1:00</option>
+                <option value="90">1:30</option>
+                <option value="120" selected>2:00</option>
+                <option value="180">3:00</option>
+                <option value="300">5:00</option>
+              </select>
+
+              <div class="timer-actions">
+                <button class="btn" id="btnTimerStart">Start</button>
+                <button class="btn secondary" id="btnTimerStop">Stop</button>
+                <button class="btn secondary" id="btnTimerReset">Reset</button>
+              </div>
             </div>
           </div>
-        </details>
+
+          <div class="notes-wrap">
+            <label for="notes">Notes (optional)</label>
+            <textarea id="notes" placeholder="Key steps / pitfalls / complications / aftercare…"></textarea>
+
+            <div class="actions">
+              <button class="btn" id="btnReviewed">✅ Mark reviewed</button>
+              <button class="btn secondary" id="btnToggleDone">⭐ Toggle done</button>
+              <button class="btn secondary" id="btnSkip">↩︎ Skip</button>
+            </div>
+          </div>
+
+          <details>
+            <summary>Backup / restore progress</summary>
+            <div class="backup-pad">
+              <div class="small">Tracking is stored in this browser (localStorage). Export JSON to move to another device.</div>
+              <div class="backup-actions">
+                <button class="btn" id="btnExport">Export JSON</button>
+                <button class="btn" id="btnImport">Import JSON</button>
+                <button class="btn danger" id="btnResetAll">Reset ALL data</button>
+              </div>
+              <textarea id="backup" style="margin-top:10px;" placeholder="Export appears here (or paste JSON to import)."></textarea>
+            </div>
+          </details>
+        </div>
+
+        <div id="hintLine" class="subtitle" style="margin-top:6px;">Pick a filter (optional), then click random.</div>
       </div>
+    </div>
+  </div>
 
-      <!-- TRACKER -->
-      <div class="card">
-        <div class="section-title">
-          <h3>Tracker</h3>
-          <div class="row">
-            <select id="sortMode">
+  <!-- Bottom tracker dock -->
+  <div class="tracker-dock">
+    <div class="tracker-shell">
+      <div class="tracker-card">
+        <div class="tracker-head">
+          <h3 class="tracker-title">Tracker</h3>
+          <div class="tracker-controls">
+            <select id="sortMode" aria-label="Sort">
               <option value="least">Least reviewed</option>
               <option value="recent">Most recently reviewed</option>
               <option value="alpha">A → Z</option>
               <option value="done">Done first</option>
             </select>
-            <input type="text" id="search" placeholder="Search…" style="width: 220px;">
+            <input type="text" id="search" placeholder="Search…" style="width:220px;">
           </div>
         </div>
 
@@ -343,7 +427,7 @@
             <thead>
               <tr>
                 <th>Procedure</th>
-                <th>Tags</th>
+                <th>Theme</th>
                 <th class="right">Reviewed</th>
                 <th>Last</th>
                 <th>Done</th>
@@ -358,15 +442,13 @@
   </div>
 
 <script>
-  /**
-   * Data source: FACEM Curriculum June 2025 "Procedures in Emergency Medicine" tables.
-   * Categories: C = common in EM; LS = life/limb/sight saving. (Used as tags)   [oai_citation:1‡2025_6-FACEM-Curriculum (dragged).pdf](sediment://file_00000000e71c71fabb4191964790d404)
-   */
-  const BUILTIN_PROCEDURES = [
-    // Infection control
+  // =======================
+  // DATA (FACEM procedures)
+  // =======================
+  // Tags include: "C" (Common) and/or "LS" (Life/limb/sight saving). Also includes a domain tag, but UI filter is only C/LS as requested.
+  const PROCEDURES = [
     { name: "Aseptic and sterile technique", tags: ["Infection control","C"] },
 
-    // Airway
     { name: "Basic airway manoeuvres (chin lift, jaw thrust, head tilt, positioning)", tags: ["Airway","C","LS"] },
     { name: "Insertion of oropharyngeal or nasopharyngeal airway", tags: ["Airway","C","LS"] },
     { name: "Insertion of a laryngeal mask airway", tags: ["Airway","C","LS"] },
@@ -380,7 +462,6 @@
     { name: "Extubation", tags: ["Airway"] },
     { name: "Indirect laryngoscopy (dental mirror exam for FB)", tags: ["Airway"] },
 
-    // Breathing
     { name: "Spirometry and Peak Flow measurement", tags: ["Breathing","C"] },
     { name: "Use of oxygen delivery devices", tags: ["Breathing","C","LS"] },
     { name: "Use of self-inflating bag for ventilation", tags: ["Breathing","C","LS"] },
@@ -392,7 +473,6 @@
     { name: "Pleurocentesis", tags: ["Breathing","C"] },
     { name: "Tube thoracostomy", tags: ["Breathing","C","LS"] },
 
-    // Circulation
     { name: "External chest compressions (infant, paediatric, adult)", tags: ["Circulation","C","LS"] },
     { name: "Defibrillation", tags: ["Circulation","C","LS"] },
     { name: "DC cardioversion", tags: ["Circulation","C","LS"] },
@@ -410,7 +490,6 @@
     { name: "Resuscitative thoracotomy", tags: ["Circulation","LS"] },
     { name: "Insertion of a temporary pacing wire", tags: ["Circulation","LS"] },
 
-    // Fluids / tubes
     { name: "Preparation of an intravenous fluid or blood product line", tags: ["Fluids & tubes","C"] },
     { name: "Insertion of a nasogastric tube or orogastric tube", tags: ["Fluids & tubes","C"] },
     { name: "Insertion of an adult urinary catheter", tags: ["Fluids & tubes","C"] },
@@ -422,7 +501,6 @@
     { name: "Insertion of oesophageal & gastric balloon devices", tags: ["Fluids & tubes","LS"] },
     { name: "Emergency replacement of a dislodged gastrostomy tube", tags: ["Fluids & tubes","C"] },
 
-    // Ortho & Neuro
     { name: "Sizing and application of a rigid cervical collar", tags: ["Ortho & neuro","C","LS"] },
     { name: "In-line cervical spine immobilisation", tags: ["Ortho & neuro","C","LS"] },
     { name: "Full spinal immobilisation, log roll, and transfer", tags: ["Ortho & neuro","C","LS"] },
@@ -437,11 +515,9 @@
     { name: "Application of traction splinting devices", tags: ["Ortho & neuro","C","LS"] },
     { name: "Arthrocentesis (knee)", tags: ["Ortho & neuro","C"] },
 
-    // Sedation
     { name: "Administration of procedural sedation", tags: ["Sedation","C"] },
     { name: "Administration of chemical restraint", tags: ["Sedation","C"] },
 
-    // Regional anaesthesia
     { name: "Use of topical anaesthesia", tags: ["Regional anaesthesia","C"] },
     { name: "Direct infiltration of local anaesthetic", tags: ["Regional anaesthesia","C"] },
     { name: "Digital nerve block", tags: ["Regional anaesthesia","C"] },
@@ -449,7 +525,6 @@
     { name: "Other peripheral nerve blocks", tags: ["Regional anaesthesia"] },
     { name: "Intravenous anaesthesia and Bier’s block", tags: ["Regional anaesthesia"] },
 
-    // Wounds
     { name: "Basic skin suturing techniques", tags: ["Wounds","C"] },
     { name: "Alternate skin closure (tissue adhesive, staples)", tags: ["Wounds","C"] },
     { name: "Advanced suturing techniques", tags: ["Wounds","C"] },
@@ -457,12 +532,10 @@
     { name: "Superficial open wound dressing", tags: ["Wounds","C"] },
     { name: "Open wound packing", tags: ["Wounds","C"] },
 
-    // Burns
     { name: "Burn first aid", tags: ["Burns","C"] },
     { name: "Primary burn dressing", tags: ["Burns","C"] },
     { name: "Escharotomy", tags: ["Burns","LS"] },
 
-    // Minor surgical
     { name: "Removal of superficial & subcutaneous foreign bodies", tags: ["Minor surgery","C"] },
     { name: "Incision and drainage of simple, superficial abscesses", tags: ["Minor surgery","C"] },
     { name: "Drainage of a paronychia", tags: ["Minor surgery","C"] },
@@ -471,20 +544,17 @@
     { name: "Drainage of peritonsillar abscess", tags: ["Minor surgery"] },
     { name: "Nail bed repair", tags: ["Minor surgery","C"] },
 
-    // O&G
     { name: "Vaginal speculum insertion", tags: ["O&G","C"] },
     { name: "Removal of products of conception from cervical os", tags: ["O&G","C","LS"] },
     { name: "Use of foetal doppler", tags: ["O&G","C"] },
     { name: "Spontaneous vaginal delivery", tags: ["O&G","LS"] },
 
-    // Microbiology
     { name: "Collection of blood culture", tags: ["Microbiology","C"] },
     { name: "Lumbar puncture + measurement of CSF opening pressure", tags: ["Microbiology","C"] },
     { name: "Paediatric non-invasive urine collection", tags: ["Microbiology","C"] },
     { name: "Collection of swabs", tags: ["Microbiology","C"] },
     { name: "Nasopharyngeal aspirate collection", tags: ["Microbiology","C"] },
 
-    // ENT
     { name: "Removal of nasal foreign bodies", tags: ["ENT","C"] },
     { name: "Removal of aural foreign bodies", tags: ["ENT","C"] },
     { name: "Removal of laryngeal foreign bodies", tags: ["ENT","C"] },
@@ -495,7 +565,6 @@
     { name: "Aural toilet", tags: ["ENT","C"] },
     { name: "Aural wick insertion", tags: ["ENT","C"] },
 
-    // Ophthalmology
     { name: "Removal of corneal foreign bodies", tags: ["Ophthalmology","C"] },
     { name: "Direct ophthalmoscopy", tags: ["Ophthalmology","C"] },
     { name: "Use of a slit lamp in the eye examination", tags: ["Ophthalmology","C"] },
@@ -504,13 +573,11 @@
     { name: "Application of an eye pad or shield", tags: ["Ophthalmology","C"] },
     { name: "Lateral canthotomy", tags: ["Ophthalmology","LS"] },
 
-    // Dental
     { name: "Joint reduction: temporo-mandibular joint", tags: ["Dental","C"] },
     { name: "Enlocation avulsed/extruded/intruded/laterally injured tooth", tags: ["Dental","C"] },
     { name: "Temporary stabilisation of injured tooth", tags: ["Dental","C"] },
     { name: "Haemostasis following dental extraction", tags: ["Dental","C"] },
 
-    // Ultrasound
     { name: "Focused Echocardiography in Life Support (FELS)", tags: ["Ultrasound","C"] },
     { name: "FAST or eFAST", tags: ["Ultrasound","C"] },
     { name: "Pneumothorax / haemothorax detection", tags: ["Ultrasound","C"] },
@@ -520,45 +587,47 @@
     { name: "Ultrasound guided nerve blocks", tags: ["Ultrasound"] },
     { name: "Identification of distended bladder", tags: ["Ultrasound","C"] },
 
-    // Tox / GI decontamination / Environmental
     { name: "Pressure immobilisation bandage", tags: ["Toxicology","C","LS"] },
     { name: "Gastric decontamination / whole bowel irrigation", tags: ["GI decontamination","LS"] },
+
     { name: "Basic warming and cooling techniques (external methods, IV fluids)", tags: ["Environmental","C","LS"] },
     { name: "Advanced warming and cooling techniques", tags: ["Environmental","LS"] }
   ];
 
-  // ------- state / storage -------
-  const KEY = "facem_proc_randomiser_tagged_v1";
-  let state = load();
-  let currentName = null;
+  // =======================
+  // STATE / STORAGE
+  // =======================
+  const KEY = "acem_osce_procedure_v2";
+  let state = loadState();
+  let current = null;
 
-  function $(id){ return document.getElementById(id); }
+  const $ = (id) => document.getElementById(id);
 
-  function load(){
+  function loadState(){
     const raw = localStorage.getItem(KEY);
     if (!raw){
-      const fresh = { procedures: BUILTIN_PROCEDURES, meta: {}, log: [] };
-      save(fresh);
+      const fresh = { procedures: PROCEDURES, meta: {}, log: [] };
+      saveState(fresh);
       return fresh;
     }
     try{
       const parsed = JSON.parse(raw);
-      // basic validation
       if (!parsed.procedures || !Array.isArray(parsed.procedures)) throw new Error("bad");
       if (!parsed.meta) parsed.meta = {};
       if (!parsed.log) parsed.log = [];
-      // ensure each procedure has tags array
-      parsed.procedures = parsed.procedures.map(p => ({
-        name: String(p.name || "").trim(),
-        tags: Array.isArray(p.tags) ? p.tags.map(String) : []
-      })).filter(p => p.name);
+      // If you ever update the PROCEDURES list, merge in any new ones:
+      const byName = new Map(parsed.procedures.map(p => [p.name, p]));
+      for (const p of PROCEDURES){
+        if (!byName.has(p.name)) byName.set(p.name, p);
+      }
+      parsed.procedures = Array.from(byName.values());
       return parsed;
     } catch(e){
       localStorage.removeItem(KEY);
-      return load();
+      return loadState();
     }
   }
-  function save(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
+  function saveState(s){ localStorage.setItem(KEY, JSON.stringify(s)); }
 
   function ensureMeta(name){
     if (!state.meta[name]) state.meta[name] = { count: 0, last: null, done: false };
@@ -569,10 +638,6 @@
     if (!iso) return "—";
     const d = new Date(iso);
     return d.toLocaleString(undefined, { year:"numeric", month:"short", day:"2-digit", hour:"2-digit", minute:"2-digit" });
-  }
-
-  function unique(arr){
-    return [...new Set(arr)];
   }
 
   function computeTotals(){
@@ -586,55 +651,34 @@
     $("pillTotals").textContent = `${total} procedures • Reviewed: ${reviewed} • Done: ${done}`;
   }
 
-  function buildFilters(){
-    const domains = unique(state.procedures.map(p => p.tags[0]).filter(Boolean)).sort();
-    const filterDomain = $("filterDomain");
-    const filterCategory = $("filterCategory");
-
-    filterDomain.innerHTML = [
-      `<option value="ALL">All domains</option>`,
-      ...domains.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`)
-    ].join("");
-
-    filterCategory.innerHTML = `
-      <option value="ALL">All categories</option>
-      <option value="C">Common ED (C)</option>
-      <option value="LS">Life/limb/sight saving (LS)</option>
-    `;
+  function themeLabelFor(name){
+    const p = state.procedures.find(x => x.name === name);
+    const tags = p ? p.tags : [];
+    const hasC = tags.includes("C");
+    const hasLS = tags.includes("LS");
+    if (hasC && hasLS) return "Common + Life-saving";
+    if (hasLS) return "Life-saving";
+    if (hasC) return "Common";
+    return "—";
   }
 
-  function getEligible(){
-    const onlyNotDone = $("chkOnlyNotDone").checked;
-    const preferLeast = $("chkPreferLeast").checked;
-
-    const domain = $("filterDomain").value;
-    const category = $("filterCategory").value;
-
-    let list = state.procedures.slice();
-
-    if (domain !== "ALL"){
-      list = list.filter(p => p.tags.includes(domain));
-    }
-    if (category !== "ALL"){
-      list = list.filter(p => p.tags.includes(category));
-    }
-    list = list.filter(p => {
-      const m = ensureMeta(p.name);
-      return !(onlyNotDone && m.done);
-    });
-
-    return { list, preferLeast };
+  function filterByTheme(list){
+    const theme = $("filterTheme").value;
+    if (theme === "ALL") return list;
+    if (theme === "C") return list.filter(p => p.tags.includes("C"));
+    if (theme === "LS") return list.filter(p => p.tags.includes("LS"));
+    if (theme === "C+LS") return list.filter(p => p.tags.includes("C") && p.tags.includes("LS"));
+    return list;
   }
 
+  // Weighted pick to bias toward less reviewed
   function pickRandom(){
-    const { list, preferLeast } = getEligible();
+    let list = state.procedures.slice();
+    list = filterByTheme(list);
+
     if (!list.length) return null;
 
-    if (!preferLeast){
-      return list[Math.floor(Math.random()*list.length)].name;
-    }
-    // weighted: 1/(count+1)
-    const weights = list.map(p => 1/(ensureMeta(p.name).count + 1));
+    const weights = list.map(p => 1 / (ensureMeta(p.name).count + 1));
     const total = weights.reduce((a,b)=>a+b,0);
     let r = Math.random() * total;
     for (let i=0;i<list.length;i++){
@@ -644,37 +688,22 @@
     return list[list.length-1].name;
   }
 
-  function getProc(name){
-    return state.procedures.find(p => p.name === name);
-  }
-
   function renderCurrent(){
-    if (!currentName){
+    if (!current){
       $("currentWrap").style.display = "none";
       $("hintLine").style.display = "block";
       return;
     }
     $("hintLine").style.display = "none";
     $("currentWrap").style.display = "block";
-    $("currentName").textContent = currentName;
+    $("currentName").textContent = current;
 
-    const proc = getProc(currentName);
-    const tags = proc ? proc.tags : [];
-    $("currentTags").innerHTML = tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("");
-
-    const m = ensureMeta(currentName);
-    $("statLine").textContent = `Reviewed: ${m.count} • Last: ${formatDate(m.last)}`;
-    $("donePill").textContent = m.done ? "Done: ✅" : "Done: —";
+    const m = ensureMeta(current);
+    $("tagTheme").textContent = `Theme: ${themeLabelFor(current)}`;
+    $("tagReviewed").textContent = `Reviewed: ${m.count}`;
+    $("tagLast").textContent = `Last: ${formatDate(m.last)}`;
+    $("tagDone").textContent = `Done: ${m.done ? "✅" : "—"}`;
     $("btnToggleDone").textContent = m.done ? "⭐ Mark not-done" : "⭐ Mark done";
-  }
-
-  function escapeHtml(s){
-    return String(s)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'","&#039;");
   }
 
   function renderTracker(){
@@ -682,7 +711,10 @@
     const mode = $("sortMode").value;
 
     let rows = state.procedures
-      .filter(p => p.name.toLowerCase().includes(q) || (p.tags.join(" ").toLowerCase().includes(q)))
+      .filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        themeLabelFor(p.name).toLowerCase().includes(q)
+      )
       .map(p => ({ p, m: ensureMeta(p.name) }));
 
     const sorter = {
@@ -697,7 +729,7 @@
     $("tbody").innerHTML = rows.map(({p,m}) => `
       <tr>
         <td>${escapeHtml(p.name)}</td>
-        <td class="small">${escapeHtml(p.tags.join(", "))}</td>
+        <td class="small">${escapeHtml(themeLabelFor(p.name))}</td>
         <td class="right">${m.count}</td>
         <td class="small">${escapeHtml(formatDate(m.last))}</td>
         <td>${m.done ? "✅" : "—"}</td>
@@ -711,13 +743,22 @@
     computeTotals();
   }
 
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
   function markReviewed(name, notes){
     const m = ensureMeta(name);
     m.count += 1;
     m.last = new Date().toISOString();
     state.log.push({ name, when: m.last, notes: notes || "" });
     if (state.log.length > 2000) state.log = state.log.slice(-2000);
-    save(state);
+    saveState(state);
     renderCurrent();
     renderTracker();
   }
@@ -725,31 +766,73 @@
   function toggleDone(name){
     const m = ensureMeta(name);
     m.done = !m.done;
-    save(state);
+    saveState(state);
     renderCurrent();
     renderTracker();
   }
 
-  // expose for table buttons
+  // Expose for table buttons
   window.quickReview = (name) => markReviewed(name, "");
   window.toggleDone = (name) => toggleDone(name);
 
-  // ------- backup / restore -------
+  // =======================
+  // TIMER
+  // =======================
+  let timerId = null;
+  let timerRemaining = 120; // seconds
+
+  function fmtTimer(sec){
+    sec = Math.max(0, Math.floor(sec));
+    const m = String(Math.floor(sec/60)).padStart(2,"0");
+    const s = String(sec%60).padStart(2,"0");
+    return `${m}:${s}`;
+  }
+  function renderTimer(){
+    $("timerDisplay").textContent = fmtTimer(timerRemaining);
+  }
+  function timerResetFromPreset(){
+    const val = Number($("timerPreset").value || 120);
+    timerRemaining = val;
+    renderTimer();
+  }
+  function timerStart(){
+    if (timerId) return;
+    timerId = setInterval(() => {
+      timerRemaining -= 1;
+      renderTimer();
+      if (timerRemaining <= 0){
+        timerStop();
+        timerRemaining = 0;
+        renderTimer();
+        try { navigator.vibrate?.(200); } catch {}
+        alert("Time!");
+      }
+    }, 1000);
+  }
+  function timerStop(){
+    if (!timerId) return;
+    clearInterval(timerId);
+    timerId = null;
+  }
+
+  // =======================
+  // BACKUP / RESTORE
+  // =======================
   function exportJson(){
     $("backup").value = JSON.stringify(state, null, 2);
   }
   function importJson(){
     const txt = $("backup").value.trim();
-    if (!txt) return alert("Paste backup JSON first.");
+    if (!txt) return alert("Paste JSON first.");
     try{
       const incoming = JSON.parse(txt);
-      if (!incoming || !Array.isArray(incoming.procedures)) return alert("Backup format not recognised.");
+      if (!incoming || !Array.isArray(incoming.procedures) || typeof incoming.meta !== "object"){
+        return alert("Backup format not recognised.");
+      }
       state = incoming;
-      if (!state.meta) state.meta = {};
       if (!state.log) state.log = [];
-      save(state);
-      currentName = null;
-      buildFilters();
+      saveState(state);
+      current = null;
       renderCurrent();
       renderTracker();
       alert("Imported.");
@@ -758,98 +841,71 @@
     }
   }
   function resetAll(){
-    if (!confirm("Reset ALL data (including progress) in this browser?")) return;
+    if (!confirm("Reset ALL progress in this browser?")) return;
     localStorage.removeItem(KEY);
-    state = load();
-    currentName = null;
-    buildFilters();
+    state = loadState();
+    current = null;
     renderCurrent();
     renderTracker();
+    exportJson();
   }
 
-  // ------- custom list override -------
-  function applyCustom(){
-    const txt = $("customList").value.trim();
-    if (!txt) return alert("Paste JSON list first.");
-    try{
-      const arr = JSON.parse(txt);
-      if (!Array.isArray(arr)) return alert("JSON must be an array.");
-      const cleaned = arr.map(x => ({
-        name: String(x.name || "").trim(),
-        tags: Array.isArray(x.tags) ? x.tags.map(String) : []
-      })).filter(x => x.name);
-
-      // replace procedures, keep meta keys where names match
-      state.procedures = cleaned;
-      for (const p of cleaned) ensureMeta(p.name);
-      save(state);
-
-      currentName = null;
-      buildFilters();
-      renderCurrent();
-      renderTracker();
-      alert("Applied custom list.");
-    } catch(e){
-      alert("Invalid JSON.");
-    }
-  }
-  function restoreBuiltIn(){
-    if (!confirm("Restore built-in FACEM list?")) return;
-    state.procedures = BUILTIN_PROCEDURES.slice();
-    for (const p of state.procedures) ensureMeta(p.name);
-    save(state);
-    currentName = null;
-    buildFilters();
-    renderCurrent();
-    renderTracker();
-  }
-
-  // ------- wiring -------
+  // =======================
+  // EVENTS
+  // =======================
   $("btnRandom").addEventListener("click", () => {
-    // show filters after first pick
-    buildFilters();
-
     const picked = pickRandom();
     if (!picked){
-      return alert("No eligible procedures with the current filters. Try loosening filters or unchecking 'only not-done'.");
+      return alert("No procedures match that filter.");
     }
-    currentName = picked;
+    current = picked;
     $("notes").value = "";
     renderCurrent();
+
+    // reset timer to preset each time you generate a new procedure
+    timerStop();
+    timerResetFromPreset();
   });
 
   $("btnSkip").addEventListener("click", () => $("btnRandom").click());
 
   $("btnReviewed").addEventListener("click", () => {
-    if (!currentName) return;
-    markReviewed(currentName, $("notes").value);
+    if (!current) return;
+    markReviewed(current, $("notes").value);
   });
 
   $("btnToggleDone").addEventListener("click", () => {
-    if (!currentName) return;
-    toggleDone(currentName);
+    if (!current) return;
+    toggleDone(current);
   });
 
-  $("filterDomain").addEventListener("change", () => {
-    // re-render tracker and allow next pick to use filter
+  $("filterTheme").addEventListener("change", () => {
+    // Filter affects random picks; also update tracker view if you search by theme labels
     renderTracker();
   });
-  $("filterCategory").addEventListener("change", () => renderTracker());
-  $("chkPreferLeast").addEventListener("change", () => renderTracker());
-  $("chkOnlyNotDone").addEventListener("change", () => renderTracker());
 
   $("sortMode").addEventListener("change", renderTracker);
   $("search").addEventListener("input", renderTracker);
 
+  $("timerPreset").addEventListener("change", () => {
+    timerStop();
+    timerResetFromPreset();
+  });
+  $("btnTimerStart").addEventListener("click", timerStart);
+  $("btnTimerStop").addEventListener("click", timerStop);
+  $("btnTimerReset").addEventListener("click", () => {
+    timerStop();
+    timerResetFromPreset();
+  });
+
   $("btnExport").addEventListener("click", exportJson);
   $("btnImport").addEventListener("click", importJson);
-  $("btnReset").addEventListener("click", resetAll);
+  $("btnResetAll").addEventListener("click", resetAll);
 
-  $("btnApplyCustom").addEventListener("click", applyCustom);
-  $("btnRestoreBuiltIn").addEventListener("click", restoreBuiltIn);
-
-  // init
-  buildFilters();
+  // =======================
+  // INIT
+  // =======================
+  timerResetFromPreset();
   renderCurrent();
   renderTracker();
 </script>
