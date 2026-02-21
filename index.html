@@ -27,8 +27,9 @@
         radial-gradient(1100px 700px at 60% 92%, rgba(236,72,153,0.16), transparent 62%),
         var(--bg);
       min-height:100vh;
-      padding: 24px 16px 420px; /* bottom padding so content doesn't hide behind tracker dock */
+      padding: 24px 16px 40px;
     }
+
     .container{ max-width: 1100px; margin: 0 auto; }
 
     header{
@@ -221,28 +222,10 @@
       margin-top: 10px;
     }
 
-    /* Bottom tracker dock */
-    .tracker-dock{
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      z-index: 50;
-      padding: 10px 12px;
-      background: rgba(10, 18, 32, 0.76);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid rgba(255,255,255,0.14);
-    }
-    .tracker-shell{
-      max-width: 1300px;
-      margin: 0 auto;
-    }
-    .tracker-card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.04));
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow:hidden;
-      box-shadow: var(--shadow);
+    /* Tracker section at bottom (NOT fixed) */
+    .tracker-section{
+      margin-top: 18px;
+      width: 100%;
     }
     .tracker-head{
       display:flex;
@@ -250,22 +233,21 @@
       justify-content:space-between;
       gap: 10px;
       flex-wrap:wrap;
-      padding: 10px 12px;
+      padding: 12px 14px;
       border-bottom: 1px solid rgba(255,255,255,0.10);
       background: rgba(0,0,0,0.10);
     }
     .tracker-title{
       margin:0;
-      font-size: 1.0rem;
-      font-weight: 850;
-      color: rgba(255,255,255,0.84);
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: rgba(255,255,255,0.86);
     }
     .tracker-controls{
       display:flex; gap:10px; align-items:center; flex-wrap:wrap;
     }
     .table-wrap{
       overflow:auto;
-      max-height: 300px; /* height of docked table */
     }
     table{
       width:100%;
@@ -311,6 +293,14 @@
     }
     .backup-pad{ padding: 12px 14px; }
     .backup-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
+
+    /* Make tracker truly full-width while keeping content padding */
+    .fullwidth{
+      width: calc(100% - 32px);
+      margin-left: auto;
+      margin-right: auto;
+      max-width: 1400px;
+    }
   </style>
 </head>
 
@@ -326,7 +316,7 @@
 
     <div class="card">
       <div class="hero">
-        <div class="hero-title">Generate a procedure and run an OSCE-style timed response</div>
+        <div class="hero-title">Pick a filter (optional), then generate a procedure</div>
 
         <div class="hero-controls">
           <label for="filterTheme">Filter:</label>
@@ -400,43 +390,41 @@
           </details>
         </div>
 
-        <div id="hintLine" class="subtitle" style="margin-top:6px;">Pick a filter (optional), then click random.</div>
+        <div id="hintLine" class="subtitle" style="margin-top:6px;">Click random to begin.</div>
       </div>
     </div>
   </div>
 
-  <!-- Bottom tracker dock -->
-  <div class="tracker-dock">
-    <div class="tracker-shell">
-      <div class="tracker-card">
-        <div class="tracker-head">
-          <h3 class="tracker-title">Tracker</h3>
-          <div class="tracker-controls">
-            <select id="sortMode" aria-label="Sort">
-              <option value="least">Least reviewed</option>
-              <option value="recent">Most recently reviewed</option>
-              <option value="alpha">A → Z</option>
-              <option value="done">Done first</option>
-            </select>
-            <input type="text" id="search" placeholder="Search…" style="width:220px;">
-          </div>
+  <!-- Tracker at bottom of page (scroll down to see it) -->
+  <div class="tracker-section fullwidth">
+    <div class="card">
+      <div class="tracker-head">
+        <h3 class="tracker-title">Tracker</h3>
+        <div class="tracker-controls">
+          <select id="sortMode" aria-label="Sort">
+            <option value="least">Least reviewed</option>
+            <option value="recent">Most recently reviewed</option>
+            <option value="alpha">A → Z</option>
+            <option value="done">Done first</option>
+          </select>
+          <input type="text" id="search" placeholder="Search…" style="width:220px;">
         </div>
+      </div>
 
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Procedure</th>
-                <th>Theme</th>
-                <th class="right">Reviewed</th>
-                <th>Last</th>
-                <th>Done</th>
-                <th class="right">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-        </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Procedure</th>
+              <th>Theme</th>
+              <th class="right">Reviewed</th>
+              <th>Last</th>
+              <th>Done</th>
+              <th class="right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -445,7 +433,7 @@
   // =======================
   // DATA (FACEM procedures)
   // =======================
-  // Tags include: "C" (Common) and/or "LS" (Life/limb/sight saving). Also includes a domain tag, but UI filter is only C/LS as requested.
+  // Tags include: "C" (Common) and/or "LS" (Life/limb/sight saving). Also includes a domain tag (not used for filtering here).
   const PROCEDURES = [
     { name: "Aseptic and sterile technique", tags: ["Infection control","C"] },
 
@@ -597,7 +585,7 @@
   // =======================
   // STATE / STORAGE
   // =======================
-  const KEY = "acem_osce_procedure_v2";
+  const KEY = "acem_osce_procedure_v3";
   let state = loadState();
   let current = null;
 
@@ -615,7 +603,8 @@
       if (!parsed.procedures || !Array.isArray(parsed.procedures)) throw new Error("bad");
       if (!parsed.meta) parsed.meta = {};
       if (!parsed.log) parsed.log = [];
-      // If you ever update the PROCEDURES list, merge in any new ones:
+
+      // Merge in any new procedures if list changes over time
       const byName = new Map(parsed.procedures.map(p => [p.name, p]));
       for (const p of PROCEDURES){
         if (!byName.has(p.name)) byName.set(p.name, p);
@@ -675,7 +664,6 @@
   function pickRandom(){
     let list = state.procedures.slice();
     list = filterByTheme(list);
-
     if (!list.length) return null;
 
     const weights = list.map(p => 1 / (ensureMeta(p.name).count + 1));
@@ -880,7 +868,6 @@
   });
 
   $("filterTheme").addEventListener("change", () => {
-    // Filter affects random picks; also update tracker view if you search by theme labels
     renderTracker();
   });
 
