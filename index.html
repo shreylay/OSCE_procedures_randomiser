@@ -61,9 +61,8 @@
       box-shadow: var(--shadow);
       overflow:hidden;
     }
-    .inner{ padding: 16px; }
 
-    /* Hero / main randomiser area */
+    /* Hero */
     .hero{
       min-height: 58vh;
       display:flex;
@@ -163,7 +162,6 @@
     .tag{
       display:inline-flex;
       align-items:center;
-      gap: 8px;
       padding: 6px 10px;
       border-radius: var(--radiusPill);
       border: 1px solid var(--border);
@@ -222,10 +220,13 @@
       margin-top: 10px;
     }
 
-    /* Tracker section at bottom (NOT fixed) */
+    /* Tracker section at bottom (NORMAL, not sticky/fixed) */
     .tracker-section{
       margin-top: 18px;
       width: 100%;
+      max-width: 1400px;
+      margin-left: auto;
+      margin-right: auto;
     }
     .tracker-head{
       display:flex;
@@ -247,7 +248,7 @@
       display:flex; gap:10px; align-items:center; flex-wrap:wrap;
     }
     .table-wrap{
-      overflow:auto;
+      overflow:auto; /* horizontal scroll if needed */
     }
     table{
       width:100%;
@@ -261,12 +262,9 @@
       vertical-align:top;
       font-size: 0.95rem;
     }
+    /* IMPORTANT: no sticky table headers */
     th{
-      position: sticky;
-      top: 0;
-      background: rgba(10, 18, 32, 0.92);
-      backdrop-filter: blur(8px);
-      z-index: 1;
+      background: rgba(10, 18, 32, 0.60);
       color: rgba(255,255,255,0.82);
       font-size: 0.9rem;
       letter-spacing: .2px;
@@ -274,7 +272,6 @@
     .right{ text-align:right; }
     .small{ font-size: 0.88rem; color: var(--muted); }
 
-    /* Backup */
     details{
       width: min(980px, 100%);
       margin-top: 10px;
@@ -293,14 +290,6 @@
     }
     .backup-pad{ padding: 12px 14px; }
     .backup-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 10px; }
-
-    /* Make tracker truly full-width while keeping content padding */
-    .fullwidth{
-      width: calc(100% - 32px);
-      margin-left: auto;
-      margin-right: auto;
-      max-width: 1400px;
-    }
   </style>
 </head>
 
@@ -395,8 +384,8 @@
     </div>
   </div>
 
-  <!-- Tracker at bottom of page (scroll down to see it) -->
-  <div class="tracker-section fullwidth">
+  <!-- Tracker at bottom of page (NORMAL scrolling) -->
+  <div class="tracker-section">
     <div class="card">
       <div class="tracker-head">
         <h3 class="tracker-title">Tracker</h3>
@@ -430,10 +419,6 @@
   </div>
 
 <script>
-  // =======================
-  // DATA (FACEM procedures)
-  // =======================
-  // Tags include: "C" (Common) and/or "LS" (Life/limb/sight saving). Also includes a domain tag (not used for filtering here).
   const PROCEDURES = [
     { name: "Aseptic and sterile technique", tags: ["Infection control","C"] },
 
@@ -582,10 +567,7 @@
     { name: "Advanced warming and cooling techniques", tags: ["Environmental","LS"] }
   ];
 
-  // =======================
-  // STATE / STORAGE
-  // =======================
-  const KEY = "acem_osce_procedure_v3";
+  const KEY = "acem_osce_procedure_v4";
   let state = loadState();
   let current = null;
 
@@ -604,7 +586,6 @@
       if (!parsed.meta) parsed.meta = {};
       if (!parsed.log) parsed.log = [];
 
-      // Merge in any new procedures if list changes over time
       const byName = new Map(parsed.procedures.map(p => [p.name, p]));
       for (const p of PROCEDURES){
         if (!byName.has(p.name)) byName.set(p.name, p);
@@ -660,12 +641,12 @@
     return list;
   }
 
-  // Weighted pick to bias toward less reviewed
   function pickRandom(){
     let list = state.procedures.slice();
     list = filterByTheme(list);
     if (!list.length) return null;
 
+    // weighted to least reviewed
     const weights = list.map(p => 1 / (ensureMeta(p.name).count + 1));
     const total = weights.reduce((a,b)=>a+b,0);
     let r = Math.random() * total;
@@ -699,10 +680,7 @@
     const mode = $("sortMode").value;
 
     let rows = state.procedures
-      .filter(p =>
-        p.name.toLowerCase().includes(q) ||
-        themeLabelFor(p.name).toLowerCase().includes(q)
-      )
+      .filter(p => p.name.toLowerCase().includes(q) || themeLabelFor(p.name).toLowerCase().includes(q))
       .map(p => ({ p, m: ensureMeta(p.name) }));
 
     const sorter = {
@@ -759,15 +737,12 @@
     renderTracker();
   }
 
-  // Expose for table buttons
   window.quickReview = (name) => markReviewed(name, "");
   window.toggleDone = (name) => toggleDone(name);
 
-  // =======================
   // TIMER
-  // =======================
   let timerId = null;
-  let timerRemaining = 120; // seconds
+  let timerRemaining = 120;
 
   function fmtTimer(sec){
     sec = Math.max(0, Math.floor(sec));
@@ -775,9 +750,7 @@
     const s = String(sec%60).padStart(2,"0");
     return `${m}:${s}`;
   }
-  function renderTimer(){
-    $("timerDisplay").textContent = fmtTimer(timerRemaining);
-  }
+  function renderTimer(){ $("timerDisplay").textContent = fmtTimer(timerRemaining); }
   function timerResetFromPreset(){
     const val = Number($("timerPreset").value || 120);
     timerRemaining = val;
@@ -792,7 +765,6 @@
         timerStop();
         timerRemaining = 0;
         renderTimer();
-        try { navigator.vibrate?.(200); } catch {}
         alert("Time!");
       }
     }, 1000);
@@ -803,95 +775,32 @@
     timerId = null;
   }
 
-  // =======================
-  // BACKUP / RESTORE
-  // =======================
-  function exportJson(){
-    $("backup").value = JSON.stringify(state, null, 2);
-  }
-  function importJson(){
-    const txt = $("backup").value.trim();
-    if (!txt) return alert("Paste JSON first.");
-    try{
-      const incoming = JSON.parse(txt);
-      if (!incoming || !Array.isArray(incoming.procedures) || typeof incoming.meta !== "object"){
-        return alert("Backup format not recognised.");
-      }
-      state = incoming;
-      if (!state.log) state.log = [];
-      saveState(state);
-      current = null;
-      renderCurrent();
-      renderTracker();
-      alert("Imported.");
-    } catch(e){
-      alert("Invalid JSON.");
-    }
-  }
-  function resetAll(){
-    if (!confirm("Reset ALL progress in this browser?")) return;
-    localStorage.removeItem(KEY);
-    state = loadState();
-    current = null;
-    renderCurrent();
-    renderTracker();
-    exportJson();
-  }
-
-  // =======================
   // EVENTS
-  // =======================
   $("btnRandom").addEventListener("click", () => {
     const picked = pickRandom();
-    if (!picked){
-      return alert("No procedures match that filter.");
-    }
+    if (!picked) return alert("No procedures match that filter.");
     current = picked;
     $("notes").value = "";
     renderCurrent();
-
-    // reset timer to preset each time you generate a new procedure
     timerStop();
     timerResetFromPreset();
   });
 
   $("btnSkip").addEventListener("click", () => $("btnRandom").click());
+  $("btnReviewed").addEventListener("click", () => { if (current) markReviewed(current, $("notes").value); });
+  $("btnToggleDone").addEventListener("click", () => { if (current) toggleDone(current); });
 
-  $("btnReviewed").addEventListener("click", () => {
-    if (!current) return;
-    markReviewed(current, $("notes").value);
-  });
-
-  $("btnToggleDone").addEventListener("click", () => {
-    if (!current) return;
-    toggleDone(current);
-  });
-
-  $("filterTheme").addEventListener("change", () => {
-    renderTracker();
-  });
+  $("filterTheme").addEventListener("change", renderTracker);
 
   $("sortMode").addEventListener("change", renderTracker);
   $("search").addEventListener("input", renderTracker);
 
-  $("timerPreset").addEventListener("change", () => {
-    timerStop();
-    timerResetFromPreset();
-  });
+  $("timerPreset").addEventListener("change", () => { timerStop(); timerResetFromPreset(); });
   $("btnTimerStart").addEventListener("click", timerStart);
   $("btnTimerStop").addEventListener("click", timerStop);
-  $("btnTimerReset").addEventListener("click", () => {
-    timerStop();
-    timerResetFromPreset();
-  });
+  $("btnTimerReset").addEventListener("click", () => { timerStop(); timerResetFromPreset(); });
 
-  $("btnExport").addEventListener("click", exportJson);
-  $("btnImport").addEventListener("click", importJson);
-  $("btnResetAll").addEventListener("click", resetAll);
-
-  // =======================
   // INIT
-  // =======================
   timerResetFromPreset();
   renderCurrent();
   renderTracker();
